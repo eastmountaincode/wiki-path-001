@@ -4,7 +4,8 @@ class TextExtractor {
   constructor() {
     // Classes to exclude from navigation (but keep visible)
     this.excludedClasses = [
-      'infobox'
+      'infobox',
+      'reference'
       // Add more classes here
     ];
 
