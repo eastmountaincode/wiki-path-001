@@ -62,6 +62,11 @@ function start() {
     }
   }
   
+// Speech to text of highlight
+ function selectWord(index) {
+    console.log('Selected Word:', index);
+}
+
   // Start on first word
   highlightWord(0);
   
@@ -142,6 +147,9 @@ function start() {
       
       const targetPos = Math.min(currentWord.positionInLine + 1, wordsOnTargetLine.length - 1);
       highlightWord(wordsOnTargetLine[targetPos].index);
+    } else if (command === 'select') {
+      //console.log('current index select', currentIndex)
+      selectWord(currentIndex);
     }
   }
   

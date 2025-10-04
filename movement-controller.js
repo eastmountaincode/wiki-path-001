@@ -17,6 +17,8 @@ class MovementController {
   handleKeyDown(e) {
     const key = e.key.toLowerCase();
     
+    // Handle e
+
     // Only handle WASD
     if (!['w', 'a', 's', 'd'].includes(key)) return;
     
@@ -99,6 +101,9 @@ class MovementController {
       this.onCommand('down');
     } else if (hasD) {
       this.onCommand('right');
+    } else if (key === 'e') {
+      e.preventDefault();
+      this.onCommand('select');
     }
   }
 }
