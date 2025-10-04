@@ -1,5 +1,6 @@
-// Wiki Path 001 - Word Navigation
+// Wiki Path 001 - Word Navigation (Multiplayer)
 // Navigate through words on a page using WASD keys
+// Now with real-time multiplayer via WebSocket!
 
 // Start when page loads
 if (document.readyState === 'loading') {
@@ -9,18 +10,11 @@ if (document.readyState === 'loading') {
 }
 
 function start() {
-  // Color palette for user highlights
-  const colorPalette = [
-    '#C44601', // Burnt orange
-    '#F57600', // Orange
-    '#8BABF1', // Light blue
-    '#0073E6', // Bright blue
-    '#054FB9'  // Dark blue
-  ];
-  
-  // Assign random color to this user
-  const userColor = colorPalette[Math.floor(Math.random() * colorPalette.length)];
-  console.log('Your highlight color:', userColor);
+  // WebSocket connection
+  const SOCKET_SERVER = 'http://localhost:3001';
+  let socket = null;
+  let userColor = null;
+  let otherUsers = {}; // Track other users in the room
   
   // Get the content area
   const extractor = new TextExtractor();
@@ -59,6 +53,22 @@ function start() {
       //words[currentIndex].style.fontWeight = 'bold';
       words[currentIndex].style.backgroundColor = userColor;
       words[currentIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      
+      // Send position update to other users
+      if (socket && wordData[currentIndex]) {
+        socket.emit('move', {
+          wordIndex: currentIndex,
+          line: wordData[currentIndex].line,
+          positionInLine: wordData[currentIndex].positionInLine
+        });
+      }
+    }
+  }
+  
+  // Highlight other users' positions
+  function highlightOtherUser(userId, wordIndex, color) {
+    if (wordIndex >= 0 && wordIndex < words.length) {
+      words[wordIndex].style.backgroundColor = color;
     }
   }
   
@@ -147,6 +157,92 @@ function start() {
   
   // Initialize movement controller
   const controller = new MovementController(handleCommand);
-  console.log('Ready!');
+  
+  // Initialize WebSocket connection
+  try {
+    socket = io(SOCKET_SERVER);
+    
+    socket.on('connect', () => {
+      console.log('🌐 Connected to multiplayer server');
+      
+      // Join room based on current page URL
+      const roomId = window.location.href;
+      socket.emit('join-room', roomId);
+      console.log('🚪 Joined room:', roomId);
+    });
+    
+    // Receive assigned color from server
+    socket.on('user-color', (color) => {
+      userColor = color;
+      console.log('🎨 Your color:', userColor);
+      
+      // Re-highlight current word with server-assigned color
+      if (words[currentIndex]) {
+        words[currentIndex].style.backgroundColor = userColor;
+      }
+    });
+    
+    // Receive current users in room
+    socket.on('room-users', (users) => {
+      console.log('👥 Users in room:', Object.keys(users).length);
+      otherUsers = users;
+      
+      // Render trails of existing users
+      Object.values(users).forEach(user => {
+        if (user.id !== socket.id && user.trail) {
+          user.trail.forEach(wordIndex => {
+            highlightOtherUser(user.id, wordIndex, user.color);
+          });
+        }
+      });
+    });
+    
+    // Another user joined
+    socket.on('user-joined', (user) => {
+      console.log('✅ User joined:', user.id);
+      otherUsers[user.id] = user;
+    });
+    
+    // Another user moved
+    socket.on('user-moved', (data) => {
+      const { id, color, position } = data;
+      
+      // Update user data
+      if (!otherUsers[id]) {
+        otherUsers[id] = { id, color, trail: [] };
+      }
+      otherUsers[id].position = position;
+      if (!otherUsers[id].trail) {
+        otherUsers[id].trail = [];
+      }
+      otherUsers[id].trail.push(position);
+      
+      // Highlight their new position
+      highlightOtherUser(id, position, color);
+    });
+    
+    // Another user left
+    socket.on('user-left', (userId) => {
+      console.log('❌ User left:', userId);
+      delete otherUsers[userId];
+    });
+    
+    socket.on('disconnect', () => {
+      console.log('🔌 Disconnected from multiplayer server');
+    });
+    
+  } catch (error) {
+    console.log('⚠️ Multiplayer unavailable:', error.message);
+    console.log('💡 Running in single-player mode');
+    // Assign random color for single-player
+    const colorPalette = [
+      '#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9', '#BAE1FF',
+      '#E0BBE4', '#FFD6A5', '#FDFFB6', '#CAFFBF', '#9BF6FF',
+      '#A0C4FF', '#FFC6FF', '#FDCAE1', '#FFDAB9', '#E6E6FA'
+    ];
+    userColor = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+  }
+  
+  console.log('✨ Ready!');
 }
 
