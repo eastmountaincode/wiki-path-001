@@ -50,12 +50,14 @@ function start() {
     if (words[currentIndex]) {
       console.log('highlight');
       words[currentIndex].style.fontWeight = 'normal';
-      pathWordIndexes.push(currentIndex);
     }
     
     currentIndex = index;
     
     if (words[currentIndex]) {
+      // Push the current word to the path (now includes the last word)
+      pathWordIndexes.push(currentIndex);
+      
       words[currentIndex].style.backgroundColor = userColor;
       words[currentIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
       
