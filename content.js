@@ -48,7 +48,6 @@ function start() {
   function highlightWord(index) {
     // Remove bold from previous word (but keep the color trail)
     if (words[currentIndex]) {
-      console.log('highlight index', currentIndex);
       words[currentIndex].style.fontWeight = 'normal';
       console.log(pathWordIndexes);
     }
