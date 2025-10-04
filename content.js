@@ -48,14 +48,16 @@ function start() {
   function highlightWord(index) {
     // Remove bold from previous word (but keep the color trail)
     if (words[currentIndex]) {
-      console.log('highlight');
+      console.log('highlight index', currentIndex);
       words[currentIndex].style.fontWeight = 'normal';
-      pathWordIndexes.push(currentIndex);
+      console.log(pathWordIndexes);
     }
     
     currentIndex = index;
     
     if (words[currentIndex]) {
+      pathWordIndexes.push(currentIndex);
+      //words[currentIndex].style.fontWeight = 'bold';
       words[currentIndex].style.backgroundColor = userColor;
       words[currentIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
       
@@ -82,13 +84,13 @@ function start() {
     currentIndex = index;
     
     if (words[currentIndex]) {
+      selectedWordIndexes.push(currentIndex);
       //words[currentIndex].style.fontWeight = 'bold';
       words[currentIndex].style.backgroundColor = userColor;
       words[currentIndex].style.filter = 'invert(75%)'
       words[currentIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
       const utterance = new SpeechSynthesisUtterance(words[currentIndex].textContent);
       speechSynthesis.speak(utterance);
-      selectedWordIndexes.push(currentIndex);
     }
 
 }
@@ -271,20 +273,21 @@ function start() {
   // Replay the path
   function replayPathWithTimeout(indexArray, index = 0, spoken = false) {
     if (index < indexArray.length) {
-      const currentIndex = indexArray[index];
-      if (words[currentIndex]) {
+      const replayIndex = indexArray[index];
+          console.log(replayIndex);
+      if (words[replayIndex]) {
       //words[index].style.fontWeight = 'bold';
-      words[currentIndex].style.backgroundColor = userColor;
-      words[currentIndex].style.filter = 'invert(75%)'
-      words[currentIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
-
+      words[replayIndex].style.backgroundColor = userColor;
+      words[replayIndex].style.filter = 'invert(75%)'
+      words[replayIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
       if (spoken) {
-        const utterance = new SpeechSynthesisUtterance(words[currentIndex].textContent);
+        console.log('speaking', words[replayIndex]);
+        const utterance = new SpeechSynthesisUtterance(words[replayIndex].textContent);
         speechSynthesis.speak(utterance);
       }
     }
       setTimeout(() => {
-                replayPathWithTimeout(indexArray, index + 1);
+                replayPathWithTimeout(indexArray, index + 1, spoken);
             }, 200); // Delay for 1 second
         } else {
             console.log("Loop finished.");
@@ -293,7 +296,6 @@ function start() {
 
   
   /** Add Replay Buttons for Testing **/
-
   const replayPathButton = document.createElement('button');
   replayPathButton.innerText = 'Replay Path';
   replayPathButton.id = 'replayPathButton'; // Assign an ID for styling or further manipulation
@@ -301,7 +303,7 @@ function start() {
    // Add styling (optional)
     replayPathButton.style.position = 'fixed';
     replayPathButton.style.bottom = '10px';
-    replayPathButton.style.right = '10px';
+    replayPathButton.style.right = '200px';
     replayPathButton.style.zIndex = '9999'; // Ensure it's on top of other elements
 
     // Add an event listener to the button
@@ -311,4 +313,22 @@ function start() {
 
     // Append the button to the page's body
     document.body.prepend(replayPathButton);
+
+  const replaySelectedButton = document.createElement('button');
+  replaySelectedButton.innerText = 'Replay Selected';
+  replaySelectedButton.id = 'replaySelectedButton'; // Assign an ID for styling or further manipulation
+
+   // Add styling (optional)
+    replaySelectedButton.style.position = 'fixed';
+    replaySelectedButton.style.bottom = '10px';
+    replaySelectedButton.style.right = '10px';
+    replaySelectedButton.style.zIndex = '9999'; // Ensure it's on top of other elements
+
+    // Add an event listener to the button
+    replaySelectedButton.addEventListener('click', () => {
+      replayPathWithTimeout(selectedWordIndexes, 0, true)
+    });
+
+    // Append the button to the page's body
+    document.body.prepend(replaySelectedButton);
 }
