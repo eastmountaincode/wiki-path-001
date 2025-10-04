@@ -26,7 +26,7 @@ function start() {
   
   // Get the content area
   const contentArea = extractor.getContentArea();
-  
+
   if (!contentArea) {
     console.log('No content area found');
     return;
@@ -111,7 +111,10 @@ function start() {
   // Handle movement commands
   function handleCommand(command) {
     const currentWord = wordData[currentIndex];
-    
+     if (command !== 'select') {
+          Tone.start();
+          playNote(currentIndex, command);
+    }
     if (command === 'left') {
       // Find previous word on same line
       for (let i = currentIndex - 1; i >= 0; i--) {
@@ -367,4 +370,15 @@ function start() {
 
     // Append the button to the page's body
     document.body.prepend(replaySelectedButton);
+
+    // Tone stuff
+      function playNote(currentIndex, command) {
+        // TODO: Send event to socket
+        console.log(words[currentIndex].textContent, command);
+        Tone.start();
+				// create a synth
+				const synth = new Tone.Synth().toDestination();
+				// play a note from that synth
+				synth.triggerAttackRelease("C4", "8n");
+	}
 }
