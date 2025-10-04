@@ -229,6 +229,16 @@ function start() {
       const roomId = window.location.href;
       socket.emit('join-room', roomId);
       console.log('🚪 Joined room:', roomId);
+      
+      // Periodically send path to server (every 5 seconds)
+      setInterval(() => {
+        if (socket && pathWordIndexes.length > 0) {
+          console.log('💾 Sending path to server:', pathWordIndexes.length, 'words');
+          socket.emit('save-path', {
+            path: pathWordIndexes
+          });
+        }
+      }, 5000); // Every 5 seconds
     });
     
     // Receive assigned color from server
@@ -251,9 +261,27 @@ function start() {
       Object.values(users).forEach(user => {
         if (user.id !== socket.id && user.trail) {
           user.trail.forEach(wordIndex => {
-            highlightOtherUser(user.id, wordIndex, user.color);
+            highlightOtherUser(wordIndex, user.color);
           });
         }
+      });
+    });
+    
+    // Receive all historical paths for this room
+    socket.on('historical-paths', (data) => {
+      console.log('📜 Received historical paths:', data.paths.length, 'paths');
+      
+      // Render each historical path
+      data.paths.forEach(pathData => {
+        const { userId, color, path } = pathData;
+        console.log(`  - Path from ${userId}: ${path.length} words`);
+        
+        // Render the path (without fade, as static background)
+        path.forEach(wordIndex => {
+          if (wordIndex >= 0 && wordIndex < words.length) {
+            words[wordIndex].style.backgroundColor = color;
+          }
+        });
       });
     });
     
@@ -278,7 +306,7 @@ function start() {
       otherUsers[id].trail.push(position);
       
       // Highlight their new position
-      highlightOtherUser(id, position, color);
+      highlightOtherUser(position, color);
     });
     
     // Another user selected a word
@@ -403,3 +431,4 @@ function start() {
 				synth.triggerAttackRelease("C4", "8n");
 	}
 }
+
