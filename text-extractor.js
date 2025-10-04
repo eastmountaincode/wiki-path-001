@@ -1,25 +1,69 @@
-// TextExtractor - Gets the body text from the page
+// TextExtractor - Gets the body content from the page
 
 class TextExtractor {
-  // Get the body text from Wikipedia page
-  getBodyText() {
+  constructor() {
+    // Classes to exclude from navigation (but keep visible)
+    this.excludedClasses = [
+      'infobox'
+      // Add more classes here
+    ];
+
+    // IDs to exclude from navigation (but keep visible)
+    this.excludedIds = [
+      'siteSub'
+      // Add more IDs here
+    ];
+
+    // Tags to exclude from navigation
+    this.excludedTags = [
+      'style',
+      'script',
+      'figure',
+      'table'
+      // Add more tags here
+    ];
+  }
+
+  // Get the body content area
+  getContentArea() {
     const contentArea = document.querySelector('#bodyContent');
     
     if (!contentArea) {
       console.log('Wikipedia content area not found');
-      return '';
+      return null;
     }
     
     console.log('Content area found: #bodyContent');
-    
-    // Get all the text
-    const text = contentArea.innerText;
-    
-    // Log only the first 200 characters of the body text for a quick preview
-    console.log('Body text (head):', text.slice(0, 200));
-    console.log('Character count:', text.length);
-    
-    return text;
+    return contentArea;
+  }
+
+  // Check if a node is inside an excluded element
+  isExcluded(node) {
+    let current = node.parentElement;
+    while (current) {
+      // Check excluded tags
+      const tagName = current.tagName ? current.tagName.toLowerCase() : '';
+      if (this.excludedTags.includes(tagName)) {
+        return true;
+      }
+      
+      // Check excluded IDs
+      if (current.id && this.excludedIds.includes(current.id)) {
+        return true;
+      }
+      
+      // Check excluded classes
+      if (current.classList) {
+        for (const className of this.excludedClasses) {
+          if (current.classList.contains(className)) {
+            return true;
+          }
+        }
+      }
+      
+      current = current.parentElement;
+    }
+    return false;
   }
 }
 
