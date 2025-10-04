@@ -363,15 +363,17 @@ function start() {
       const replayIndex = indexArray[index];
       
       if (words[replayIndex] && replayIndex >= 0 && replayIndex < words.length) {
-        // Set instant color change (no transition on applying color)
+        // Set instant color change with lower opacity for historical paths
         words[replayIndex].style.transition = 'none';
         words[replayIndex].style.backgroundColor = color;
+        words[replayIndex].style.opacity = '0.4'; // Lower opacity for historical paths
         
         // Enable transition and fade to white over 1 second
         setTimeout(() => {
           if (words[replayIndex]) {
-            words[replayIndex].style.transition = 'background-color 1s ease-out';
+            words[replayIndex].style.transition = 'background-color 1s ease-out, opacity 1s ease-out';
             words[replayIndex].style.backgroundColor = 'white';
+            words[replayIndex].style.opacity = '1'; // Fade back to full opacity
           }
         }, 10);
       }
