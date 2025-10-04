@@ -48,16 +48,17 @@ function start() {
   
   // Highlight current word
   function highlightWord(index) {
+    // Remove bold from previous word (but keep the color trail)
     if (words[currentIndex]) {
       words[currentIndex].style.fontWeight = 'normal';
-      words[currentIndex].style.backgroundColor = '';
     }
+    
     currentIndex = index;
+    
     if (words[currentIndex]) {
       //words[currentIndex].style.fontWeight = 'bold';
       words[currentIndex].style.backgroundColor = userColor;
       words[currentIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
-      console.log('Highlighted word:', words[currentIndex].textContent);
     }
   }
   
