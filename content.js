@@ -9,6 +9,19 @@ if (document.readyState === 'loading') {
 }
 
 function start() {
+  // Color palette for user highlights
+  const colorPalette = [
+    '#C44601', // Burnt orange
+    '#F57600', // Orange
+    '#8BABF1', // Light blue
+    '#0073E6', // Bright blue
+    '#054FB9'  // Dark blue
+  ];
+  
+  // Assign random color to this user
+  const userColor = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+  console.log('Your highlight color:', userColor);
+  
   // Get the content area
   const extractor = new TextExtractor();
   const contentArea = extractor.getContentArea();
@@ -42,7 +55,7 @@ function start() {
     currentIndex = index;
     if (words[currentIndex]) {
       words[currentIndex].style.fontWeight = 'bold';
-      words[currentIndex].style.backgroundColor = 'yellow';
+      words[currentIndex].style.backgroundColor = userColor;
       words[currentIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
       console.log('Highlighted word:', words[currentIndex].textContent);
     }
