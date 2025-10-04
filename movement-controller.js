@@ -20,7 +20,7 @@ class MovementController {
     // Only handle WASD
     if (!['w', 'a', 's', 'd', 'e'].includes(key)) return;
     
-    e.preventDefault();
+    //e.preventDefault();
     
     const wasEmpty = this.keysPressed.size === 0;
     
