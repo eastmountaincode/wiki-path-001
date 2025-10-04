@@ -54,7 +54,7 @@ function start() {
     }
     currentIndex = index;
     if (words[currentIndex]) {
-      words[currentIndex].style.fontWeight = 'bold';
+      //words[currentIndex].style.fontWeight = 'bold';
       words[currentIndex].style.backgroundColor = userColor;
       words[currentIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
       console.log('Highlighted word:', words[currentIndex].textContent);
