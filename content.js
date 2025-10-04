@@ -64,7 +64,17 @@ function start() {
   
 // Speech to text of highlight
  function selectWord(index) {
-    console.log('Selected Word:', index);
+    currentIndex = index;
+    
+    if (words[currentIndex]) {
+      //words[currentIndex].style.fontWeight = 'bold';
+      words[currentIndex].style.backgroundColor = userColor;
+      words[currentIndex].style.filter = 'invert(75%)'
+      words[currentIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      const utterance = new SpeechSynthesisUtterance(words[currentIndex].textContent);
+      speechSynthesis.speak(utterance);
+    }
+
 }
 
   // Start on first word
