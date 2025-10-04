@@ -271,17 +271,15 @@ function start() {
     socket.on('historical-paths', (data) => {
       console.log('📜 Received historical paths:', data.paths.length, 'paths');
       
-      // Render each historical path
-      data.paths.forEach(pathData => {
+      // Replay each historical path with animation
+      data.paths.forEach((pathData, pathIndex) => {
         const { userId, color, path } = pathData;
-        console.log(`  - Path from ${userId}: ${path.length} words`);
+        console.log(`  - Replaying path from ${userId}: ${path.length} words`);
         
-        // Render the path (without fade, as static background)
-        path.forEach(wordIndex => {
-          if (wordIndex >= 0 && wordIndex < words.length) {
-            words[wordIndex].style.backgroundColor = color;
-          }
-        });
+        // Replay this path with a delay so we can see each one
+        setTimeout(() => {
+          replayHistoricalPath(path, color);
+        }, pathIndex * 500); // Stagger each path by 500ms
       });
     });
     
@@ -358,6 +356,31 @@ function start() {
   }
   
   console.log('✨ Ready!');
+
+  // Replay a historical path with a specific color
+  function replayHistoricalPath(indexArray, color, index = 0) {
+    if (index < indexArray.length) {
+      const replayIndex = indexArray[index];
+      
+      if (words[replayIndex] && replayIndex >= 0 && replayIndex < words.length) {
+        // Set instant color change (no transition on applying color)
+        words[replayIndex].style.transition = 'none';
+        words[replayIndex].style.backgroundColor = color;
+        
+        // Enable transition and fade to white over 1 second
+        setTimeout(() => {
+          if (words[replayIndex]) {
+            words[replayIndex].style.transition = 'background-color 1s ease-out';
+            words[replayIndex].style.backgroundColor = 'white';
+          }
+        }, 10);
+      }
+      
+      setTimeout(() => {
+        replayHistoricalPath(indexArray, color, index + 1);
+      }, 50); // Fast replay - 50ms between words
+    }
+  }
 
   // Replay the path
   function replayPathWithTimeout(indexArray, index = 0, spoken = false) {
