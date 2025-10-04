@@ -16,6 +16,10 @@ function start() {
   let userColor = null;
   let otherUsers = {}; // Track other users in the room
   
+  // Initialize path storage arrays
+  const pathWordIndexes = [];
+  const selectedWordIndexes = [];
+
   // Get the content area
   const extractor = new TextExtractor();
   const contentArea = extractor.getContentArea();
@@ -24,7 +28,7 @@ function start() {
     console.log('No content area found');
     return;
   }
-  
+
   // Wrap all words in spans
   const wrapper = new WordWrapper(extractor);
   const words = wrapper.wrapWords(contentArea);
@@ -42,6 +46,13 @@ function start() {
   
   // Highlight current word
   function highlightWord(index) {
+    // Remove bold from previous word (but keep the color trail)
+    if (words[currentIndex]) {
+      console.log('highlight');
+      words[currentIndex].style.fontWeight = 'normal';
+      pathWordIndexes.push(currentIndex);
+    }
+    
     currentIndex = index;
     
     if (words[currentIndex]) {
@@ -77,6 +88,7 @@ function start() {
       words[currentIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
       const utterance = new SpeechSynthesisUtterance(words[currentIndex].textContent);
       speechSynthesis.speak(utterance);
+      selectedWordIndexes.push(currentIndex);
     }
 
 }
@@ -255,5 +267,48 @@ function start() {
   }
   
   console.log('✨ Ready!');
-}
 
+  // Replay the path
+  function replayPathWithTimeout(indexArray, index = 0, spoken = false) {
+    if (index < indexArray.length) {
+      const currentIndex = indexArray[index];
+      if (words[currentIndex]) {
+      //words[index].style.fontWeight = 'bold';
+      words[currentIndex].style.backgroundColor = userColor;
+      words[currentIndex].style.filter = 'invert(75%)'
+      words[currentIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+
+      if (spoken) {
+        const utterance = new SpeechSynthesisUtterance(words[currentIndex].textContent);
+        speechSynthesis.speak(utterance);
+      }
+    }
+      setTimeout(() => {
+                replayPathWithTimeout(indexArray, index + 1);
+            }, 200); // Delay for 1 second
+        } else {
+            console.log("Loop finished.");
+        }
+  }
+
+  
+  /** Add Replay Buttons for Testing **/
+
+  const replayPathButton = document.createElement('button');
+  replayPathButton.innerText = 'Replay Path';
+  replayPathButton.id = 'replayPathButton'; // Assign an ID for styling or further manipulation
+
+   // Add styling (optional)
+    replayPathButton.style.position = 'fixed';
+    replayPathButton.style.bottom = '10px';
+    replayPathButton.style.right = '10px';
+    replayPathButton.style.zIndex = '9999'; // Ensure it's on top of other elements
+
+    // Add an event listener to the button
+    replayPathButton.addEventListener('click', () => {
+      replayPathWithTimeout(pathWordIndexes)
+    });
+
+    // Append the button to the page's body
+    document.body.prepend(replayPathButton);
+}
