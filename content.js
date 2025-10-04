@@ -11,7 +11,7 @@ if (document.readyState === 'loading') {
 
 function start() {
   // WebSocket connection
-  const SOCKET_SERVER = 'http://localhost:3001';
+  const SOCKET_SERVER = 'https://wiki-path.freewaterhouse.com';
   let socket = null;
   let userColor = null;
   let otherUsers = {}; // Track other users in the room
