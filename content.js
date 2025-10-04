@@ -20,8 +20,11 @@ function start() {
   const pathWordIndexes = [];
   const selectedWordIndexes = [];
 
-  // Get the content area
+  // Initialize components
   const extractor = new TextExtractor();
+  const tts = new TextToSpeech();
+  
+  // Get the content area
   const contentArea = extractor.getContentArea();
   
   if (!contentArea) {
@@ -81,8 +84,23 @@ function start() {
       words[currentIndex].style.backgroundColor = userColor;
       words[currentIndex].style.filter = 'invert(75%)'
       words[currentIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
-      const utterance = new SpeechSynthesisUtterance(words[currentIndex].textContent);
-      speechSynthesis.speak(utterance);
+      tts.speak(words[currentIndex].textContent);
+      
+      // Send selection to other users
+      if (socket && wordData[currentIndex]) {
+        console.log('📤 EMITTING select-emit:', {
+          wordIndex: currentIndex,
+          text: words[currentIndex].textContent
+        });
+        socket.emit('select-emit', {
+          wordIndex: currentIndex,
+          line: wordData[currentIndex].line,
+          positionInLine: wordData[currentIndex].positionInLine,
+          text: words[currentIndex].textContent
+        });
+      } else {
+        console.log('⚠️ Cannot emit select-emit - socket:', !!socket, 'wordData:', !!wordData[currentIndex]);
+      }
     }
 
 }
@@ -239,6 +257,33 @@ function start() {
       highlightOtherUser(id, position, color);
     });
     
+    // Another user selected a word
+    socket.on('select-receive', (data) => {
+      const { id, color, position, text } = data;
+      
+      console.log('📥 RECEIVED select-receive:', {
+        userId: id,
+        text: text,
+        position: position,
+        color: color
+      });
+      
+      // Update user data
+      if (!otherUsers[id]) {
+        otherUsers[id] = { id, color, trail: [] };
+      }
+      
+      // Highlight the selected word with inverted filter
+      if (position >= 0 && position < words.length) {
+        words[position].style.backgroundColor = color;
+        words[position].style.filter = 'invert(75%)';
+        console.log('✅ Highlighted and speaking word:', text);
+      }
+      
+      // Optionally: speak the word that another user selected
+      tts.speak(text);
+    });
+    
     // Another user left
     socket.on('user-left', (userId) => {
       console.log('❌ User left:', userId);
@@ -274,8 +319,7 @@ function start() {
       words[replayIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
       if (spoken) {
         console.log('speaking', words[replayIndex]);
-        const utterance = new SpeechSynthesisUtterance(words[replayIndex].textContent);
-        speechSynthesis.speak(utterance);
+        tts.speak(words[replayIndex].textContent);
       }
     }
       setTimeout(() => {
