@@ -5,8 +5,8 @@
   "description": "nonverbal communication with words",
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"]
+      "matches": ["*://*.wikipedia.org/*"],
+      "js": ["text-extractor.js", "content.js"]
     }
   ]
 }
