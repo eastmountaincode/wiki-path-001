@@ -67,8 +67,6 @@ function start() {
   // Handle movement commands
   function handleCommand(command) {
     const currentWord = wordData[currentIndex];
-    console.log('Current word:', currentWord);
-    console.log('Current index:', currentIndex);
     
     if (command === 'left') {
       // Find previous word on same line
@@ -89,12 +87,11 @@ function start() {
     } else if (command === 'up') {
       // Find word on previous line at closest X position
       const targetLine = currentWord.line - 1;
-      if (targetLine < 0) return; // No line above
+      if (targetLine < 0) return;
       
       const wordsOnTargetLine = wordData.filter(w => w.line === targetLine);
       if (wordsOnTargetLine.length === 0) return;
       
-      // Find closest word by position
       const targetPos = Math.min(currentWord.positionInLine, wordsOnTargetLine.length - 1);
       highlightWord(wordsOnTargetLine[targetPos].index);
     } else if (command === 'down') {
@@ -102,10 +99,47 @@ function start() {
       const targetLine = currentWord.line + 1;
       
       const wordsOnTargetLine = wordData.filter(w => w.line === targetLine);
-      if (wordsOnTargetLine.length === 0) return; // No line below
+      if (wordsOnTargetLine.length === 0) return;
       
-      // Find closest word by position
       const targetPos = Math.min(currentWord.positionInLine, wordsOnTargetLine.length - 1);
+      highlightWord(wordsOnTargetLine[targetPos].index);
+    } else if (command === 'up-left') {
+      // Go up one line and left one word
+      const targetLine = currentWord.line - 1;
+      if (targetLine < 0) return;
+      
+      const wordsOnTargetLine = wordData.filter(w => w.line === targetLine);
+      if (wordsOnTargetLine.length === 0) return;
+      
+      const targetPos = Math.max(0, Math.min(currentWord.positionInLine - 1, wordsOnTargetLine.length - 1));
+      highlightWord(wordsOnTargetLine[targetPos].index);
+    } else if (command === 'up-right') {
+      // Go up one line and right one word
+      const targetLine = currentWord.line - 1;
+      if (targetLine < 0) return;
+      
+      const wordsOnTargetLine = wordData.filter(w => w.line === targetLine);
+      if (wordsOnTargetLine.length === 0) return;
+      
+      const targetPos = Math.min(currentWord.positionInLine + 1, wordsOnTargetLine.length - 1);
+      highlightWord(wordsOnTargetLine[targetPos].index);
+    } else if (command === 'down-left') {
+      // Go down one line and left one word
+      const targetLine = currentWord.line + 1;
+      
+      const wordsOnTargetLine = wordData.filter(w => w.line === targetLine);
+      if (wordsOnTargetLine.length === 0) return;
+      
+      const targetPos = Math.max(0, Math.min(currentWord.positionInLine - 1, wordsOnTargetLine.length - 1));
+      highlightWord(wordsOnTargetLine[targetPos].index);
+    } else if (command === 'down-right') {
+      // Go down one line and right one word
+      const targetLine = currentWord.line + 1;
+      
+      const wordsOnTargetLine = wordData.filter(w => w.line === targetLine);
+      if (wordsOnTargetLine.length === 0) return;
+      
+      const targetPos = Math.min(currentWord.positionInLine + 1, wordsOnTargetLine.length - 1);
       highlightWord(wordsOnTargetLine[targetPos].index);
     }
   }
