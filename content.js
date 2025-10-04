@@ -42,15 +42,9 @@ function start() {
   
   // Highlight current word
   function highlightWord(index) {
-    // Remove bold from previous word (but keep the color trail)
-    if (words[currentIndex]) {
-      words[currentIndex].style.fontWeight = 'normal';
-    }
-    
     currentIndex = index;
     
     if (words[currentIndex]) {
-      //words[currentIndex].style.fontWeight = 'bold';
       words[currentIndex].style.backgroundColor = userColor;
       words[currentIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
       
@@ -254,9 +248,8 @@ function start() {
     console.log('💡 Running in single-player mode');
     // Assign random color for single-player
     const colorPalette = [
-      '#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9', '#BAE1FF',
-      '#E0BBE4', '#FFD6A5', '#FDFFB6', '#CAFFBF', '#9BF6FF',
-      '#A0C4FF', '#FFC6FF', '#FDCAE1', '#FFDAB9', '#E6E6FA'
+      '#970302', '#E679A6', '#EE8019', '#F0BC00', '#5748B5',
+      '#305D70', '#0E65C0', '#049DFF', '#E9E7C4', '#308557', '#71D1B3'
     ];
     userColor = colorPalette[Math.floor(Math.random() * colorPalette.length)];
   }
