@@ -53,8 +53,19 @@ function start() {
     
     if (words[currentIndex]) {
       pathWordIndexes.push(currentIndex);
+      
+      // Set instant color change (no transition on applying color)
+      words[currentIndex].style.transition = 'none';
       words[currentIndex].style.backgroundColor = userColor;
       words[currentIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      
+      // Enable transition and fade to white over 1 second
+      setTimeout(() => {
+        if (words[index]) {
+          words[index].style.transition = 'background-color 1s ease-out';
+          words[index].style.backgroundColor = 'white';
+        }
+      }, 10); // Small delay to ensure transition applies
       
       // Send position update to other users
       if (socket && wordData[currentIndex]) {
@@ -68,9 +79,19 @@ function start() {
   }
   
   // Highlight other users' positions
-  function highlightOtherUser(userId, wordIndex, color) {
+  function highlightOtherUser(wordIndex, color) {
     if (wordIndex >= 0 && wordIndex < words.length) {
+      // Set instant color change (no transition on applying color)
+      words[wordIndex].style.transition = 'none';
       words[wordIndex].style.backgroundColor = color;
+      
+      // Enable transition and fade to white over 1 second
+      setTimeout(() => {
+        if (words[wordIndex]) {
+          words[wordIndex].style.transition = 'background-color 1s ease-out';
+          words[wordIndex].style.backgroundColor = 'white';
+        }
+      }, 10); // Small delay to ensure transition applies
     }
   }
   
