@@ -18,7 +18,7 @@ class MovementController {
     const key = e.key.toLowerCase();
     
     // Only handle WASD
-    if (!['w', 'a', 's', 'd'].includes(key)) return;
+    if (!['w', 'a', 's', 'd', 'e'].includes(key)) return;
     
     e.preventDefault();
     
@@ -79,6 +79,7 @@ class MovementController {
     const hasA = this.keysPressed.has('a');
     const hasS = this.keysPressed.has('s');
     const hasD = this.keysPressed.has('d');
+    const hasE = this.keysPressed.has('e');
     
     // Diagonal movements (two keys pressed)
     if (hasW && hasA) {
@@ -99,6 +100,8 @@ class MovementController {
       this.onCommand('down');
     } else if (hasD) {
       this.onCommand('right');
+    } else if (hasE) {
+      this.onCommand('select');
     }
   }
 }

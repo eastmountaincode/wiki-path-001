@@ -72,6 +72,21 @@ function start() {
     }
   }
   
+// Speech to text of highlight
+ function selectWord(index) {
+    currentIndex = index;
+    
+    if (words[currentIndex]) {
+      //words[currentIndex].style.fontWeight = 'bold';
+      words[currentIndex].style.backgroundColor = userColor;
+      words[currentIndex].style.filter = 'invert(75%)'
+      words[currentIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      const utterance = new SpeechSynthesisUtterance(words[currentIndex].textContent);
+      speechSynthesis.speak(utterance);
+    }
+
+}
+
   // Start on first word
   highlightWord(0);
   
@@ -152,6 +167,9 @@ function start() {
       
       const targetPos = Math.min(currentWord.positionInLine + 1, wordsOnTargetLine.length - 1);
       highlightWord(wordsOnTargetLine[targetPos].index);
+    } else if (command === 'select') {
+      //console.log('current index select', currentIndex)
+      selectWord(currentIndex);
     }
   }
   
