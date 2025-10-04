@@ -399,7 +399,7 @@ function start() {
     }
       setTimeout(() => {
                 replayPathWithTimeout(indexArray, index + 1, spoken);
-            }, 200); // Delay for 1 second
+            }, 50); // Fast replay - 50ms between words
         } else {
             console.log("Loop finished.");
         }
