@@ -45,18 +45,11 @@ function start() {
   const wordData = calculator.calculatePositions(words);
   
   // Highlight current word
-  function highlightWord(index) {
-    // Remove bold from previous word (but keep the color trail)
-    if (words[currentIndex]) {
-      words[currentIndex].style.fontWeight = 'normal';
-      console.log(pathWordIndexes);
-    }
-    
+  function highlightWord(index) {    
     currentIndex = index;
     
     if (words[currentIndex]) {
       pathWordIndexes.push(currentIndex);
-      //words[currentIndex].style.fontWeight = 'bold';
       words[currentIndex].style.backgroundColor = userColor;
       words[currentIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
       
