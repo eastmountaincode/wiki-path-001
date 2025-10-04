@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Wiki path 001",
+  "version": "1.0.0",
+  "description": "nonverbal communication with words",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}
+
