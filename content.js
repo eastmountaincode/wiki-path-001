@@ -760,7 +760,7 @@ function start() {
   const saveSelectedButton = document.createElement("button");
   saveSelectedButton.innerText = "Save my words";
   saveSelectedButton.id = "saveSelectedButton";
-  styleButton(saveSelectedButton, 0); // Index 0 (bottom button)
+  styleButton(saveSelectedButton, 2); // Index 0 (bottom button)
   saveSelectedButton.addEventListener("click", () => {
     if (socket && selectedWordIndexes.length > 2) {
       console.log(
