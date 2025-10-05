@@ -745,6 +745,7 @@ function start() {
     button.style.minWidth = "150px";
     button.style.fontFamily = "sans-serif";
     button.style.transition = "background-color 0.2s, color 0.2s";
+    button.style.fontWeight = "bold";
     
     // Add hover effects using event listeners
     button.addEventListener("mouseenter", () => {
