@@ -131,15 +131,13 @@ function start() {
   
   // Handle movement commands
   function handleCommand(command) {
+    Tone.start();
     const currentWord = wordData[currentIndex];
-     if (command !== 'select') {
-          Tone.start();
-          playNote(currentIndex, command);
-    }
     if (command === 'left') {
       // Find previous word on same line
       for (let i = currentIndex - 1; i >= 0; i--) {
         if (wordData[i].line === currentWord.line) {
+          playNote(i, command, currentWord.line);
           highlightWord(i);
           return;
         }
@@ -149,6 +147,7 @@ function start() {
       for (let i = currentIndex + 1; i < words.length; i++) {
         if (wordData[i].line === currentWord.line) {
           highlightWord(i);
+          playNote(i, command, currentWord.line);
           return;
         }
       }
@@ -162,6 +161,7 @@ function start() {
       
       const targetPos = Math.min(currentWord.positionInLine, wordsOnTargetLine.length - 1);
       highlightWord(wordsOnTargetLine[targetPos].index);
+      playNote(wordsOnTargetLine[targetPos].index, command, targetLine)
     } else if (command === 'down') {
       // Find word on next line at closest X position
       const targetLine = currentWord.line + 1;
@@ -171,6 +171,7 @@ function start() {
       
       const targetPos = Math.min(currentWord.positionInLine, wordsOnTargetLine.length - 1);
       highlightWord(wordsOnTargetLine[targetPos].index);
+      playNote(wordsOnTargetLine[targetPos].index, command, targetLine)
     } else if (command === 'up-left') {
       // Go up one line and left one word
       const targetLine = currentWord.line - 1;
@@ -181,6 +182,8 @@ function start() {
       
       const targetPos = Math.max(0, Math.min(currentWord.positionInLine - 1, wordsOnTargetLine.length - 1));
       highlightWord(wordsOnTargetLine[targetPos].index);
+      playNote(wordsOnTargetLine[targetPos].index, command, targetLine);
+
     } else if (command === 'up-right') {
       // Go up one line and right one word
       const targetLine = currentWord.line - 1;
@@ -191,6 +194,7 @@ function start() {
       
       const targetPos = Math.min(currentWord.positionInLine + 1, wordsOnTargetLine.length - 1);
       highlightWord(wordsOnTargetLine[targetPos].index);
+      playNote(wordsOnTargetLine[targetPos].index, command, targetLine);
     } else if (command === 'down-left') {
       // Go down one line and left one word
       const targetLine = currentWord.line + 1;
@@ -200,6 +204,7 @@ function start() {
       
       const targetPos = Math.max(0, Math.min(currentWord.positionInLine - 1, wordsOnTargetLine.length - 1));
       highlightWord(wordsOnTargetLine[targetPos].index);
+      playNote(wordsOnTargetLine[targetPos].index, command, targetLine);
     } else if (command === 'down-right') {
       // Go down one line and right one word
       const targetLine = currentWord.line + 1;
@@ -209,6 +214,7 @@ function start() {
       
       const targetPos = Math.min(currentWord.positionInLine + 1, wordsOnTargetLine.length - 1);
       highlightWord(wordsOnTargetLine[targetPos].index);
+      playNote(wordsOnTargetLine[targetPos].index, command, targetLine);
     } else if (command === 'select') {
       //console.log('current index select', currentIndex)
       selectWord(currentIndex);
@@ -446,14 +452,24 @@ function start() {
     document.body.prepend(replaySelectedButton);
 
     // Tone stuff
-      function playNote(currentIndex, command) {
+      function playNote(currentIndex, command, line) {
         // TODO: Send event to socket
-        console.log(words[currentIndex].textContent, command);
+        const noteWord = words[currentIndex].textContent;
+        const direction = command;
+        const depth = line;
+
+        const noteLength = noteWord.length * 0.05;
+        const noteOctave = depth % 4;
+        const noteNumber = currentIndex % 5;
+        const noteMap = ['A', 'C', 'D', 'E', 'G'];
+
+        console.log(noteMap[noteNumber], noteOctave);
+        
         Tone.start();
 				// create a synth
 				const synth = new Tone.Synth().toDestination();
 				// play a note from that synth
-				synth.triggerAttackRelease("C4", "8n");
+				synth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
 	}
 }
 
