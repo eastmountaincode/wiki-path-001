@@ -494,9 +494,13 @@ function start() {
     if (savedPaths.length > 0) {
       const randomPath = savedPaths[Math.floor(Math.random() * savedPaths.length)];
       console.log('🎲 Replaying random selected path from server:', randomPath.selectedWords.length, 'words');
-      pathReplayer.replayHistoricalPath(randomPath.selectedWords, randomPath.color);
+      pathReplayer.replayServerSelectedWords(randomPath.selectedWords, randomPath.color);
     } else {
       console.log('⚠️ No saved selected paths from server');
+      replayServerSelectedButton.innerText = 'No saved paths!';
+      setTimeout(() => {
+        replayServerSelectedButton.innerText = 'Replay Random Selected (Server)';
+      }, 2000);
     }
   });
   document.body.prepend(replayServerSelectedButton);

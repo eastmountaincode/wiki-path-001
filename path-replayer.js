@@ -70,14 +70,25 @@ class PathReplayer {
     });
   }
 
-  // Replay selected words (words you marked with E key) with speech
+  // Replay selected words (words you marked with E key) with speech (no notes)
   replaySelectedWords(selectedWordIndexes, instrument) {
     console.log('🗣️ Replaying selected words:', selectedWordIndexes.length, 'words');
     this._replayWordArray(selectedWordIndexes, 0, {
       spoken: true,
       color: this.userColor,
       opacity: 1.0,
-      instrument: instrument
+      instrument: null  // No notes for local replay
+    });
+  }
+
+  // Replay selected words from server with speech and their original color
+  replayServerSelectedWords(selectedWordIndexes, color) {
+    console.log('🎲 Replaying server selected words:', selectedWordIndexes.length, 'words');
+    this._replayWordArray(selectedWordIndexes, 0, {
+      spoken: true,
+      color: color,
+      opacity: 1.0,
+      instrument: null  // No notes
     });
   }
 
