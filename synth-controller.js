@@ -16,7 +16,7 @@ class SynthController {
     Tone.start();
     
     // Create volume control (reduce volume a bit)
-    this.volume = new Tone.Volume(-12).toDestination(); // -12dB quieter
+    this.volume = new Tone.Volume(-6).toDestination(); // -XdB quieter
     
     this.reverb = new Tone.Reverb({
       decay: 7,
