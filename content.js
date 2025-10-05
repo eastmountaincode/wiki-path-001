@@ -31,6 +31,7 @@ function start() {
   let userColor = '#308557'; // Default color
   let userInstrument = colorInstrumentMap[userColor]; // Default instrument
   let otherUsers = {}; // Track other users in the room
+  let savedSelectedPaths = {}; // Store saved selected paths from server
   
   // Synth instances (created once and reused)
   let userSynth = null;
@@ -344,6 +345,21 @@ function start() {
       });
     });
     
+    // Receive all saved selected paths for this room
+    socket.on('saved-selected-paths', (data) => {
+      console.log('📝 Received saved selected paths:', data.selectedPaths.length, 'paths');
+      
+      // Store them for later replay
+      savedSelectedPaths = {};
+      data.selectedPaths.forEach((pathData) => {
+        const { userId, color, selectedWords } = pathData;
+        if (selectedWords && selectedWords.length > 0) {
+          savedSelectedPaths[userId] = { color, selectedWords };
+          console.log(`  - Saved selected path from ${userId}: ${selectedWords.length} words`);
+        }
+      });
+    });
+    
     // Another user joined
     socket.on('user-joined', (user) => {
       console.log('✅ User joined:', user.id);
@@ -429,41 +445,86 @@ function start() {
   
   console.log('✨ Ready!');
 
-  /** Add Replay Buttons for Testing **/
+  /** Add Button Controls - Stacked Column in Lower Right **/
+  
+  // Common button styling function
+  const styleButton = (button, bottomPosition) => {
+    button.style.position = 'fixed';
+    button.style.bottom = bottomPosition;
+    button.style.right = '10px';
+    button.style.zIndex = '9999';
+    button.style.backgroundColor = 'white';
+    button.style.color = 'black';
+    button.style.padding = '10px 15px';
+    button.style.border = '1px solid black';
+    button.style.borderRadius = '4px';
+    button.style.cursor = 'pointer';
+    button.style.minWidth = '150px';
+    button.style.fontFamily = 'monospace';
+  };
+
+  // Replay Path button
   const replayPathButton = document.createElement('button');
-  replayPathButton.innerText = 'Replay Path';
-  replayPathButton.id = 'replayPathButton'; // Assign an ID for styling or further manipulation
+  replayPathButton.innerText = 'Replay Path (Local)';
+  replayPathButton.id = 'replayPathButton';
+  styleButton(replayPathButton, '190px');
+  replayPathButton.addEventListener('click', () => {
+    pathReplayer.replayLocalPath(pathWordIndexes, userInstrument);
+  });
+  document.body.prepend(replayPathButton);
 
-   // Add styling (optional)
-    replayPathButton.style.position = 'fixed';
-    replayPathButton.style.bottom = '10px';
-    replayPathButton.style.right = '200px';
-    replayPathButton.style.zIndex = '9999'; // Ensure it's on top of other elements
-
-    // Add an event listener to the button
-    replayPathButton.addEventListener('click', () => {
-      pathReplayer.replayLocalPath(pathWordIndexes, userInstrument);
-    });
-
-    // Append the button to the page's body
-    document.body.prepend(replayPathButton);
-
+  // Replay Selected button
   const replaySelectedButton = document.createElement('button');
-  replaySelectedButton.innerText = 'Replay Selected';
-  replaySelectedButton.id = 'replaySelectedButton'; // Assign an ID for styling or further manipulation
+  replaySelectedButton.innerText = 'Replay Selected (Local)';
+  replaySelectedButton.id = 'replaySelectedButton';
+  styleButton(replaySelectedButton, '130px');
+  replaySelectedButton.addEventListener('click', () => {
+    pathReplayer.replaySelectedWords(selectedWordIndexes, userInstrument);
+  });
+  document.body.prepend(replaySelectedButton);
 
-   // Add styling (optional)
-    replaySelectedButton.style.position = 'fixed';
-    replaySelectedButton.style.bottom = '10px';
-    replaySelectedButton.style.right = '10px';
-    replaySelectedButton.style.zIndex = '9999'; // Ensure it's on top of other elements
+  // Replay Random Selected from Server button
+  const replayServerSelectedButton = document.createElement('button');
+  replayServerSelectedButton.innerText = 'Replay Random Selected (Server)';
+  replayServerSelectedButton.id = 'replayServerSelectedButton';
+  styleButton(replayServerSelectedButton, '70px');
+  replayServerSelectedButton.addEventListener('click', () => {
+    // Get all saved selected paths from server
+    const savedPaths = Object.values(savedSelectedPaths);
+    if (savedPaths.length > 0) {
+      const randomPath = savedPaths[Math.floor(Math.random() * savedPaths.length)];
+      console.log('🎲 Replaying random selected path from server:', randomPath.selectedWords.length, 'words');
+      pathReplayer.replayHistoricalPath(randomPath.selectedWords, randomPath.color);
+    } else {
+      console.log('⚠️ No saved selected paths from server');
+    }
+  });
+  document.body.prepend(replayServerSelectedButton);
 
-    // Add an event listener to the button
-    replaySelectedButton.addEventListener('click', () => {
-      pathReplayer.replaySelectedWords(selectedWordIndexes, userInstrument);
-    });
-
-    // Append the button to the page's body
-    document.body.prepend(replaySelectedButton);
+  // Save Selected button
+  const saveSelectedButton = document.createElement('button');
+  saveSelectedButton.innerText = 'Save Selected To Server';
+  saveSelectedButton.id = 'saveSelectedButton';
+  styleButton(saveSelectedButton, '10px');
+  saveSelectedButton.addEventListener('click', () => {
+    if (socket && selectedWordIndexes.length > 0) {
+      console.log('💾 Saving selected words to server:', selectedWordIndexes.length, 'words');
+      socket.emit('save-selected-words', {
+        selectedWords: selectedWordIndexes
+      });
+      // Visual feedback
+      saveSelectedButton.innerText = 'Saved ✓';
+      setTimeout(() => {
+        saveSelectedButton.innerText = 'Save Selected To Server';
+      }, 2000);
+    } else {
+      console.log('⚠️ No selected words to save');
+      saveSelectedButton.innerText = 'No words selected!';
+      setTimeout(() => {
+        saveSelectedButton.innerText = 'Save Selected To Server';
+      }, 2000);
+    }
+  });
+  document.body.prepend(saveSelectedButton);
 
   }
