@@ -724,10 +724,15 @@ function start() {
 
   /** Add Button Controls - Stacked Column in Lower Right **/
 
-  // Common button styling function
-  const styleButton = (button, bottomPosition) => {
+  // Button configuration
+  const BUTTON_GAP = 60; // Gap between buttons in pixels
+  const BUTTON_BASE = 10; // Distance from bottom for first button
+
+  // Common button styling function (index: 0 = bottom, 1 = second from bottom, etc.)
+  const styleButton = (button, index) => {
+    const bottomPosition = BUTTON_BASE + (index * BUTTON_GAP);
     button.style.position = "fixed";
-    button.style.bottom = bottomPosition;
+    button.style.bottom = `${bottomPosition}px`;
     button.style.right = "10px";
     button.style.zIndex = "9999";
     button.style.backgroundColor = "#f8f9fa";
@@ -745,17 +750,47 @@ function start() {
   const replayPathButton = document.createElement("button");
   replayPathButton.innerText = "Replay my path";
   replayPathButton.id = "replayPathButton";
-  styleButton(replayPathButton, "190px");
+  styleButton(replayPathButton, 3); // Index 3 (top button)
   replayPathButton.addEventListener("click", () => {
     pathReplayer.replayLocalPath(pathWordIndexes, userInstrument);
   });
   document.body.prepend(replayPathButton);
 
+  // Save Selected button
+  const saveSelectedButton = document.createElement("button");
+  saveSelectedButton.innerText = "Save my words";
+  saveSelectedButton.id = "saveSelectedButton";
+  styleButton(saveSelectedButton, 0); // Index 0 (bottom button)
+  saveSelectedButton.addEventListener("click", () => {
+    if (socket && selectedWordIndexes.length > 2) {
+      console.log(
+        "💾 Saving selected words to server:",
+        selectedWordIndexes.length,
+        "words"
+      );
+      socket.emit("save-selected-words", {
+        selectedWords: selectedWordIndexes,
+      });
+      // Visual feedback
+      saveSelectedButton.innerText = "Saved ✓";
+      setTimeout(() => {
+        saveSelectedButton.innerText = "Save my words";
+      }, 2000);
+    } else {
+      console.log("⚠️ No selected words to save");
+      saveSelectedButton.innerText = "No words selected!";
+      setTimeout(() => {
+        saveSelectedButton.innerText = "Save my words";
+      }, 2000);
+    }
+  });
+  document.body.prepend(saveSelectedButton);
+
   // Replay Selected button
   const replaySelectedButton = document.createElement("button");
   replaySelectedButton.innerText = "Replay my words";
   replaySelectedButton.id = "replaySelectedButton";
-  styleButton(replaySelectedButton, "130px");
+  styleButton(replaySelectedButton, 1); // Index 2
   replaySelectedButton.addEventListener("click", () => {
     pathReplayer.replaySelectedWords(selectedWordIndexes, userInstrument);
   });
@@ -765,7 +800,7 @@ function start() {
   const replayServerSelectedButton = document.createElement("button");
   replayServerSelectedButton.innerText = "Play their words";
   replayServerSelectedButton.id = "replayServerSelectedButton";
-  styleButton(replayServerSelectedButton, "70px");
+  styleButton(replayServerSelectedButton, 0); // Index 1
   replayServerSelectedButton.addEventListener("click", () => {
     // Get all saved selected paths from server
     console.log("🔍 Current savedSelectedPaths:", savedSelectedPaths);
@@ -795,33 +830,5 @@ function start() {
   });
   document.body.prepend(replayServerSelectedButton);
 
-  // Save Selected button
-  const saveSelectedButton = document.createElement("button");
-  saveSelectedButton.innerText = "Save Selected To Server";
-  saveSelectedButton.id = "saveSelectedButton";
-  styleButton(saveSelectedButton, "10px");
-  saveSelectedButton.addEventListener("click", () => {
-    if (socket && selectedWordIndexes.length > 0) {
-      console.log(
-        "💾 Saving selected words to server:",
-        selectedWordIndexes.length,
-        "words"
-      );
-      socket.emit("save-selected-words", {
-        selectedWords: selectedWordIndexes,
-      });
-      // Visual feedback
-      saveSelectedButton.innerText = "Saved ✓";
-      setTimeout(() => {
-        saveSelectedButton.innerText = "Save Selected To Server";
-      }, 2000);
-    } else {
-      console.log("⚠️ No selected words to save");
-      saveSelectedButton.innerText = "No words selected!";
-      setTimeout(() => {
-        saveSelectedButton.innerText = "Save Selected To Server";
-      }, 2000);
-    }
-  });
-  document.body.prepend(saveSelectedButton);
+
 }
