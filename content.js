@@ -366,7 +366,7 @@ function start() {
         // Set instant color change with lower opacity for historical paths
         words[replayIndex].style.transition = 'none';
         words[replayIndex].style.backgroundColor = color;
-        words[replayIndex].style.opacity = '0.4'; // Lower opacity for historical paths
+        words[replayIndex].style.opacity = '0.2'; // Lower opacity for historical paths
         
         // Enable transition and fade to white over 1 second
         setTimeout(() => {
