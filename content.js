@@ -16,7 +16,7 @@ function start() {
     '#E679A6': 'DuoSynth',     // Pink
     '#EE8019': 'FMSynth',      // Orange
     '#F0BC00': 'MembraneSynth', // Yellow
-    '#5748B5': 'MetalSynth',   // Purple
+    '#5748B5': 'PolySynth',    // Purple
     '#305D70': 'MonoSynth',    // Dark green
     '#0E65C0': 'NoiseSynth',   // Blue
     '#049DFF': 'PluckSynth',   // Bright Blue
@@ -150,18 +150,17 @@ function start() {
   // Start on first word
   highlightWord(0);
   
-  // Initiate some tone stuff
-  let toneInitiated = false;
-  let AMSynth;
-  let DuoSynth;
-  let FMSynth;
-  let MembraneSynth;
-  let MetalSynth;
-  let MonoSynth;
-  let NoiseSynth;
-  let PluckSynth;
-  let PolySynth;
-  let synth;
+   // Initiate some tone stuff
+   let toneInitiated = false;
+   let AMSynth;
+   let DuoSynth;
+   let FMSynth;
+   let MembraneSynth;
+   let MonoSynth;
+   let NoiseSynth;
+   let PluckSynth;
+   let PolySynth;
+   let synth;
   
   // Handle movement commands
   function handleCommand(command) {
@@ -174,17 +173,16 @@ function start() {
           preDelay: 0.01, // Adjust preDelay as desired
           wet: 0.8, // Adjust wet/dry mix as desired
         }).toDestination(); // Connect the reverb to the master output
-            // Create the appropriate synth based on instrument type
-            AMSynth = new Tone.AMSynth().toDestination().connect(reverb);
-            DuoSynth = new Tone.DuoSynth().toDestination().connect(reverb);
-            FMSynth = new Tone.FMSynth().toDestination().connect(reverb);
-            MembraneSynth = new Tone.MembraneSynth().toDestination().connect(reverb);
-            MetalSynth = new Tone.MetalSynth().toDestination().connect(reverb);
-            MonoSynth = new Tone.MonoSynth().toDestination().connect(reverb);
-            NoiseSynth = new Tone.NoiseSynth().toDestination().connect(reverb);
-            PluckSynth = new Tone.PluckSynth().toDestination().connect(reverb);
-            PolySynth = new Tone.PolySynth().toDestination().connect(reverb);
-            synth = new Tone.Synth().toDestination().connect(reverb);
+             // Create the appropriate synth based on instrument type
+             AMSynth = new Tone.AMSynth().toDestination().connect(reverb);
+             DuoSynth = new Tone.DuoSynth().toDestination().connect(reverb);
+             FMSynth = new Tone.FMSynth().toDestination().connect(reverb);
+             MembraneSynth = new Tone.MembraneSynth().toDestination().connect(reverb);
+             MonoSynth = new Tone.MonoSynth().toDestination().connect(reverb);
+             NoiseSynth = new Tone.NoiseSynth().toDestination().connect(reverb);
+             PluckSynth = new Tone.PluckSynth().toDestination().connect(reverb);
+             PolySynth = new Tone.PolySynth().toDestination().connect(reverb);
+             synth = new Tone.Synth().toDestination().connect(reverb);
         
       synth.connect(reverb);
       toneInitiated = true;
@@ -539,39 +537,36 @@ function start() {
 
         console.log(noteMap[noteNumber], noteOctave, 'instrument:', instrument);
 
-         switch(instrument) {
-          case 'AMSynth':
-            AMSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
-            break;
-          case 'DuoSynth':
-            DuoSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
-            break;
-          case 'FMSynth':
-            FMSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
-            break;
-          case 'MembraneSynth':
-            MembraneSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
-            break;
-          case 'MetalSynth':
-            MetalSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
-            break;
-          case 'MonoSynth':
-            MonoSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
-            break;
-          case 'NoiseSynth':
-            NoiseSytnh.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
-            break;
-          case 'PluckSynth':
-            PluckSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
-            break;
-          case 'PolySynth':
-            DuoSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
-            break;
-          case 'Synth':
-          default:
-            synth = new Tone.Synth().toDestination();
-            break;
-        }
+          switch(instrument) {
+           case 'AMSynth':
+             AMSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+             break;
+           case 'DuoSynth':
+             DuoSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+             break;
+           case 'FMSynth':
+             FMSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+             break;
+           case 'MembraneSynth':
+             MembraneSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+             break;
+           case 'MonoSynth':
+             MonoSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+             break;
+           case 'NoiseSynth':
+             NoiseSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+             break;
+           case 'PluckSynth':
+             PluckSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+             break;
+           case 'PolySynth':
+             PolySynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+             break;
+           case 'Synth':
+           default:
+             synth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+             break;
+         }
 
         synth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
       }
