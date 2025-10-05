@@ -6,7 +6,7 @@
   "content_scripts": [
     {
       "matches": ["*://*.wikipedia.org/*"],
-      "js": ["socket.io.min.js", "text-extractor.js", "word-wrapper.js", "line-pos-calculator.js", "movement-controller.js", "text-to-speech.js", "content.js", "tone.js"]
+      "js": ["socket.io.min.js", "text-extractor.js", "word-wrapper.js", "line-pos-calculator.js", "movement-controller.js", "text-to-speech.js", "synth-controller.js", "path-replayer.js", "content.js", "tone.js"]
     }
   ]
 }

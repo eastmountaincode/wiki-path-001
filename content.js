@@ -44,6 +44,7 @@ function start() {
   // Initialize components
   const extractor = new TextExtractor();
   const tts = new TextToSpeech();
+  const synthController = new SynthController(colorInstrumentMap);
   
   // Get the content area
   const contentArea = extractor.getContentArea();
@@ -67,6 +68,9 @@ function start() {
   // Calculate line positions for each word
   const calculator = new LinePosCalculator();
   const wordData = calculator.calculatePositions(words);
+  
+  // Initialize path replayer
+  const pathReplayer = new PathReplayer(words, wordData, synthController, tts, userColor);
   
   // Highlight current word
   function highlightWord(index) {
@@ -170,52 +174,19 @@ function start() {
   // Start on first word
   highlightWord(0);
   
-   // Initiate some tone stuff
-   let toneInitiated = false;
-   let AMSynth;
-   let DuoSynth;
-   let FMSynth;
-   let MembraneSynth;
-   let MonoSynth;
-   let NoiseSynth;
-   let PluckSynth;
-   let PolySynth;
-   let synth;
-  
   // Handle movement commands
   function handleCommand(command) {
-    if (!toneInitiated) {
-      Tone.start();
-          // Tone stuff
-                // Play a note from that synth
-        // Create volume control (reduce volume a bit)
-        const volume = new Tone.Volume(-12).toDestination(); // -12dB quieter
-        
-        const reverb = new Tone.Reverb({
-          decay: 7, // Adjust decay time as desired
-          preDelay: 0.01, // Adjust preDelay as desired
-          wet: 0.8, // Adjust wet/dry mix as desired
-        }).connect(volume); // Connect reverb to volume then to destination
-        
-             // Create the appropriate synth based on instrument type
-             AMSynth = new Tone.AMSynth().connect(reverb);
-             DuoSynth = new Tone.DuoSynth().connect(reverb);
-             FMSynth = new Tone.FMSynth().connect(reverb);
-             MembraneSynth = new Tone.MembraneSynth().connect(reverb);
-             MonoSynth = new Tone.MonoSynth().connect(reverb);
-             NoiseSynth = new Tone.NoiseSynth().connect(reverb);
-             PluckSynth = new Tone.PluckSynth().connect(reverb);
-             PolySynth = new Tone.PolySynth().connect(reverb);
-             synth = new Tone.Synth().connect(reverb);
-        
-      toneInitiated = true;
+    // Initialize synths on first command
+    if (!synthController.isInitialized()) {
+      synthController.initializeSynths();
     }
+    
     const currentWord = wordData[currentIndex];
     if (command === 'left') {
       // Find previous word on same line
       for (let i = currentIndex - 1; i >= 0; i--) {
         if (wordData[i].line === currentWord.line) {
-          playNote(i, command, currentWord.line);
+          synthController.playNote(i, words, wordData, userInstrument);
           highlightWord(i);
           return;
         }
@@ -225,7 +196,7 @@ function start() {
       for (let i = currentIndex + 1; i < words.length; i++) {
         if (wordData[i].line === currentWord.line) {
           highlightWord(i);
-          playNote(i, command, currentWord.line);
+          synthController.playNote(i, words, wordData, userInstrument);
           return;
         }
       }
@@ -239,7 +210,7 @@ function start() {
       
       const targetPos = Math.min(currentWord.positionInLine, wordsOnTargetLine.length - 1);
       highlightWord(wordsOnTargetLine[targetPos].index);
-      playNote(wordsOnTargetLine[targetPos].index, command, targetLine)
+      synthController.playNote(wordsOnTargetLine[targetPos].index, words, wordData, userInstrument);
     } else if (command === 'down') {
       // Find word on next line at closest X position
       const targetLine = currentWord.line + 1;
@@ -249,7 +220,7 @@ function start() {
       
       const targetPos = Math.min(currentWord.positionInLine, wordsOnTargetLine.length - 1);
       highlightWord(wordsOnTargetLine[targetPos].index);
-      playNote(wordsOnTargetLine[targetPos].index, command, targetLine)
+      synthController.playNote(wordsOnTargetLine[targetPos].index, words, wordData, userInstrument);
     } else if (command === 'up-left') {
       // Go up one line and left one word
       const targetLine = currentWord.line - 1;
@@ -260,7 +231,7 @@ function start() {
       
       const targetPos = Math.max(0, Math.min(currentWord.positionInLine - 1, wordsOnTargetLine.length - 1));
       highlightWord(wordsOnTargetLine[targetPos].index);
-      playNote(wordsOnTargetLine[targetPos].index, command, targetLine);
+      synthController.playNote(wordsOnTargetLine[targetPos].index, words, wordData, userInstrument);
 
     } else if (command === 'up-right') {
       // Go up one line and right one word
@@ -272,7 +243,7 @@ function start() {
       
       const targetPos = Math.min(currentWord.positionInLine + 1, wordsOnTargetLine.length - 1);
       highlightWord(wordsOnTargetLine[targetPos].index);
-      playNote(wordsOnTargetLine[targetPos].index, command, targetLine);
+      synthController.playNote(wordsOnTargetLine[targetPos].index, words, wordData, userInstrument);
     } else if (command === 'down-left') {
       // Go down one line and left one word
       const targetLine = currentWord.line + 1;
@@ -282,7 +253,7 @@ function start() {
       
       const targetPos = Math.max(0, Math.min(currentWord.positionInLine - 1, wordsOnTargetLine.length - 1));
       highlightWord(wordsOnTargetLine[targetPos].index);
-      playNote(wordsOnTargetLine[targetPos].index, command, targetLine);
+      synthController.playNote(wordsOnTargetLine[targetPos].index, words, wordData, userInstrument);
     } else if (command === 'down-right') {
       // Go down one line and right one word
       const targetLine = currentWord.line + 1;
@@ -292,7 +263,7 @@ function start() {
       
       const targetPos = Math.min(currentWord.positionInLine + 1, wordsOnTargetLine.length - 1);
       highlightWord(wordsOnTargetLine[targetPos].index);
-      playNote(wordsOnTargetLine[targetPos].index, command, targetLine);
+      synthController.playNote(wordsOnTargetLine[targetPos].index, words, wordData, userInstrument);
     } else if (command === 'select') {
       //console.log('current index select', currentIndex)
       selectWord(currentIndex);
@@ -368,7 +339,7 @@ function start() {
         
         // Replay this path with a delay so we can see each one
         setTimeout(() => {
-          replayHistoricalPath(path, color);
+          pathReplayer.replayHistoricalPath(path, color);
         }, pathIndex * 500); // Stagger each path by 500ms
       });
     });
@@ -398,7 +369,7 @@ function start() {
       highlightOtherUser(position, color);
       
       // Play note for other user's movement with their instrument
-      playNote(position, 'other-user', line, instrument, id);
+      synthController.playNote(position, words, wordData, instrument);
     });
     
     // Another user selected a word
@@ -458,66 +429,6 @@ function start() {
   
   console.log('✨ Ready!');
 
-  // Replay a historical path with a specific color
-  function replayHistoricalPath(indexArray, color, index = 0) {
-    if (index < indexArray.length) {
-      const replayIndex = indexArray[index];
-      
-      if (words[replayIndex] && replayIndex >= 0 && replayIndex < words.length) {
-        // Set instant color change with lower opacity for historical paths
-        words[replayIndex].style.transition = 'none';
-        words[replayIndex].style.backgroundColor = color;
-        words[replayIndex].style.opacity = '0.1'; // Lower opacity for historical paths
-        
-        // Enable transition and fade to white over 1 second
-        setTimeout(() => {
-          if (words[replayIndex]) {
-            words[replayIndex].style.transition = 'background-color 1s ease-out, opacity 1s ease-out';
-            words[replayIndex].style.backgroundColor = 'white';
-            words[replayIndex].style.opacity = '1'; // Fade back to full opacity
-          }
-        }, 10);
-      }
-      
-      setTimeout(() => {
-        replayHistoricalPath(indexArray, color, index + 1);
-      }, 50); // Fast replay - 50ms between words
-    }
-  }
-
-  // Replay the path
-  function replayPathWithTimeout(indexArray, index = 0, spoken = false) {
-    if (index < indexArray.length) {
-      const replayIndex = indexArray[index];
-      if (words[replayIndex]) {
-      playNote(replayIndex, 'none', wordData[index].line);
-      //words[index].style.fontWeight = 'bold';
-      words[replayIndex].style.transition = 'none';
-      words[replayIndex].style.backgroundColor = userColor;
-      words[replayIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
-      
-      // Enable transition and fade to white over 1 second
-      setTimeout(() => {
-        if (words[replayIndex]) {
-          words[replayIndex].style.transition = 'background-color 1s ease-out';
-          words[replayIndex].style.backgroundColor = 'white';
-        }
-      }, 10);
-      
-      if (spoken) {
-        console.log('speaking', words[replayIndex]);
-        tts.speak(words[replayIndex].textContent);
-      }
-    }
-      setTimeout(() => {
-                replayPathWithTimeout(indexArray, index + 1, spoken);
-            }, 50); // Fast replay - 50ms between words
-        } else {
-            console.log("Loop finished.");
-        }
-  }
-
-  
   /** Add Replay Buttons for Testing **/
   const replayPathButton = document.createElement('button');
   replayPathButton.innerText = 'Replay Path';
@@ -531,7 +442,7 @@ function start() {
 
     // Add an event listener to the button
     replayPathButton.addEventListener('click', () => {
-      replayPathWithTimeout(pathWordIndexes)
+      pathReplayer.replayLocalPath(pathWordIndexes, userInstrument);
     });
 
     // Append the button to the page's body
@@ -549,66 +460,10 @@ function start() {
 
     // Add an event listener to the button
     replaySelectedButton.addEventListener('click', () => {
-      replayPathWithTimeout(selectedWordIndexes, 0, true)
+      pathReplayer.replaySelectedWords(selectedWordIndexes, userInstrument);
     });
 
     // Append the button to the page's body
     document.body.prepend(replaySelectedButton);
 
-      // Tone stuff
-
-       function playNote(currentIndex, command, line, instrument = userInstrument) {
-         // Safety check: don't play if synths aren't initialized yet
-         if (!toneInitiated) return;
-         
-         const noteWord = words[currentIndex].textContent;
-         const direction = command;
-         const depth = line;
-
-         const noteLength = noteWord.length * 0.05;
-         const noteOctave = depth % 4 + 1;
-         const noteNumber = currentIndex % 5;
-         const noteMap = ['A', 'C', 'D', 'E', 'G'];
-
-        console.log(noteMap[noteNumber], noteOctave, 'instrument:', instrument);
-
-          // Use "+0.01" to schedule note slightly in future to prevent timing conflicts
-          const now = Tone.now();
-          
-          try {
-            switch(instrument) {
-           case 'AMSynth':
-             AMSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
-             break;
-           case 'DuoSynth':
-             DuoSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
-             break;
-           case 'FMSynth':
-             FMSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
-             break;
-           case 'MembraneSynth':
-             MembraneSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
-             break;
-           case 'MonoSynth':
-             MonoSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
-             break;
-           case 'NoiseSynth':
-             // NoiseSynth doesn't support pitched notes, just trigger with duration
-             NoiseSynth.triggerAttackRelease(noteLength, now + 0.01);
-             break;
-           case 'PluckSynth':
-             PluckSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
-             break;
-           case 'PolySynth':
-             PolySynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
-             break;
-           case 'Synth':
-           default:
-             synth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
-             break;
-         }
-          } catch (error) {
-            console.warn('Error playing note:', error.message);
-          }
-      }
-    }
+  }
