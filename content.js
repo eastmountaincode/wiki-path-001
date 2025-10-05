@@ -118,32 +118,50 @@ function start() {
     }
   }
   
-// Speech to text of highlight
+// Speech to text of highlight (toggle selection)
  function selectWord(index) {
     currentIndex = index;
     
     if (words[currentIndex]) {
-      selectedWordIndexes.push(currentIndex);
-      //words[currentIndex].style.fontWeight = 'bold';
-      words[currentIndex].style.backgroundColor = userColor;
-      words[currentIndex].style.filter = 'invert(75%)'
-      words[currentIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
-      tts.speak(words[currentIndex].textContent);
+      // Check if word is already selected
+      const selectedIndex = selectedWordIndexes.indexOf(currentIndex);
       
-      // Send selection to other users
-      if (socket && wordData[currentIndex]) {
-        console.log('📤 EMITTING select-emit:', {
-          wordIndex: currentIndex,
-          text: words[currentIndex].textContent
-        });
-        socket.emit('select-emit', {
-          wordIndex: currentIndex,
-          line: wordData[currentIndex].line,
-          positionInLine: wordData[currentIndex].positionInLine,
-          text: words[currentIndex].textContent
-        });
+      if (selectedIndex !== -1) {
+        // Word is selected - DESELECT it
+        selectedWordIndexes.splice(selectedIndex, 1);
+        
+        // Remove visual effects
+        words[currentIndex].style.backgroundColor = 'white';
+        words[currentIndex].style.filter = 'none';
+        
+        console.log('🔽 Deselected word:', words[currentIndex].textContent);
       } else {
-        console.log('⚠️ Cannot emit select-emit - socket:', !!socket, 'wordData:', !!wordData[currentIndex]);
+        // Word is not selected - SELECT it
+        selectedWordIndexes.push(currentIndex);
+        
+        // Apply visual effects
+        words[currentIndex].style.backgroundColor = userColor;
+        words[currentIndex].style.filter = 'invert(75%)'
+        words[currentIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        tts.speak(words[currentIndex].textContent);
+        
+        console.log('🔼 Selected word:', words[currentIndex].textContent);
+        
+        // Send selection to other users
+        if (socket && wordData[currentIndex]) {
+          console.log('📤 EMITTING select-emit:', {
+            wordIndex: currentIndex,
+            text: words[currentIndex].textContent
+          });
+          socket.emit('select-emit', {
+            wordIndex: currentIndex,
+            line: wordData[currentIndex].line,
+            positionInLine: wordData[currentIndex].positionInLine,
+            text: words[currentIndex].textContent
+          });
+        } else {
+          console.log('⚠️ Cannot emit select-emit - socket:', !!socket, 'wordData:', !!wordData[currentIndex]);
+        }
       }
     }
 
