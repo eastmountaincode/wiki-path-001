@@ -150,8 +150,58 @@ function start() {
   // Start on first word
   highlightWord(0);
   
+  // Initiate some tone stuff
+  let toneInitiated = false;
+  let synth;
+  
   // Handle movement commands
   function handleCommand(command) {
+    if (!toneInitiated) {
+      Tone.start();
+          // Tone stuff
+                // Play a note from that synth
+        const reverb = new Tone.Reverb({
+          decay: 7, // Adjust decay time as desired
+          preDelay: 0.01, // Adjust preDelay as desired
+          wet: 0.8, // Adjust wet/dry mix as desired
+        }).toDestination(); // Connect the reverb to the master output
+            // Create the appropriate synth based on instrument type
+        switch(userInstrument) {
+          case 'AMSynth':
+            synth = new Tone.AMSynth().toDestination();
+            break;
+          case 'DuoSynth':
+            synth = new Tone.DuoSynth().toDestination();
+            break;
+          case 'FMSynth':
+            synth = new Tone.FMSynth().toDestination();
+            break;
+          case 'MembraneSynth':
+            synth = new Tone.MembraneSynth().toDestination();
+            break;
+          case 'MetalSynth':
+            synth = new Tone.MetalSynth().toDestination();
+            break;
+          case 'MonoSynth':
+            synth = new Tone.MonoSynth().toDestination();
+            break;
+          case 'NoiseSynth':
+            synth = new Tone.NoiseSynth().toDestination();
+            break;
+          case 'PluckSynth':
+            synth = new Tone.PluckSynth().toDestination();
+            break;
+          case 'PolySynth':
+            synth = new Tone.PolySynth().toDestination();
+            break;
+          case 'Synth':
+          default:
+            synth = new Tone.Synth().toDestination();
+            break;
+        }
+      synth.connect(reverb);
+      toneInitiated = true;
+    }
     const currentWord = wordData[currentIndex];
     if (command === 'left') {
       // Find previous word on same line
@@ -488,69 +538,21 @@ function start() {
     // Append the button to the page's body
     document.body.prepend(replaySelectedButton);
 
-    // Helper function to create a synth based on instrument type
-    function createSynth(instrument) {
-      switch(instrument) {
-        case 'AMSynth':
-          return new Tone.AMSynth().toDestination();
-        case 'DuoSynth':
-          return new Tone.DuoSynth().toDestination();
-        case 'FMSynth':
-          return new Tone.FMSynth().toDestination();
-        case 'MembraneSynth':
-          return new Tone.MembraneSynth().toDestination();
-        case 'MetalSynth':
-          return new Tone.MetalSynth().toDestination();
-        case 'MonoSynth':
-          return new Tone.MonoSynth().toDestination();
-        case 'NoiseSynth':
-          return new Tone.NoiseSynth().toDestination();
-        case 'PluckSynth':
-          return new Tone.PluckSynth().toDestination();
-        case 'PolySynth':
-          return new Tone.PolySynth().toDestination();
-        case 'Synth':
-        default:
-          return new Tone.Synth().toDestination();
-      }
-    }
-    
-    // Tone stuff - play a note using reusable synth instances
-    function playNote(currentIndex, command, line, instrument = userInstrument, userId = null) {
-      const noteWord = words[currentIndex].textContent;
-      const depth = line;
+      // Tone stuff
 
-      const noteLength = noteWord.length * 0.05;
-      const noteOctave = depth % 4;
-      const noteNumber = currentIndex % 5;
-      const noteMap = ['A', 'C', 'D', 'E', 'G'];
+      function playNote(currentIndex, command, line, instrument = userInstrument) {
+        const noteWord = words[currentIndex].textContent;
+        const direction = command;
+        const depth = line;
 
-      console.log(noteMap[noteNumber], noteOctave, 'instrument:', instrument);
-      
-      // Start Tone.js on first interaction
-      if (!toneStarted) {
-        Tone.start();
-        toneStarted = true;
-      }
-      
-      // Get or create the appropriate synth
-      let synth;
-      if (userId) {
-        // This is another user's note
-        if (!otherUserSynths[userId]) {
-          otherUserSynths[userId] = createSynth(instrument);
-        }
-        synth = otherUserSynths[userId];
-      } else {
-        // This is the current user's note
-        if (!userSynth) {
-          userSynth = createSynth(userInstrument);
-        }
-        synth = userSynth;
-      }
-      
-      // Play a note from that synth
-      synth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+        const noteLength = noteWord.length * 0.05;
+        const noteOctave = depth % 4 + 1;
+        const noteNumber = currentIndex % 5;
+        const noteMap = ['A', 'C', 'D', 'E', 'G'];
+
+        console.log(noteMap[noteNumber], noteOctave, 'instrument:', instrument);
+
+        synth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
 	}
 }
 
