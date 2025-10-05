@@ -297,7 +297,7 @@ function start() {
     
     // Another user moved
     socket.on('user-moved', (data) => {
-      const { id, color, position } = data;
+      const { id, color, position, line } = data;
       
       // Update user data
       if (!otherUsers[id]) {
@@ -311,6 +311,9 @@ function start() {
       
       // Highlight their new position
       highlightOtherUser(position, color);
+      
+      // Play note for other user's movement
+      playNote(position, 'other-user', line);
     });
     
     // Another user selected a word
