@@ -37,7 +37,7 @@ We wanted to offer Wikipedia users a way to enjoy articles together, catch a gli
 
 - Enable developper mode on the top right of your screen.
 
-- Click on load unpacked and navigate to the unzipped folder.
+- Click on load unpacked on the top left of your screen and navigate to the unzipped folder.
 
 ##### Step three
 
