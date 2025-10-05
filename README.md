@@ -15,6 +15,14 @@ We wanted to offer Wikipedia users a way to enjoy articles together, catch a gli
 
 - Clicking E enables user to highlight a word. Users can highlight as many words as they please or as many words as they need to string their message together.
 
+## Uses
+
+- Try to communicate live with other users live by using the limited vocabulary of the page you are one
+
+- Leave a message for whoever to find. Perhaps a poem, a cryptic entry or a confession for your crush
+
+- Follow an other user to an other page by holding hands together
+
 
 ## Tech
 
