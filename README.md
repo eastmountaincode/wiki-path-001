@@ -17,7 +17,7 @@ We wanted to offer Wikipedia users a way to enjoy articles together, catch a gli
 
 ## Uses
 
-- Try to communicate live with other users live by using the limited vocabulary of the page you are one
+- Try to communicate with other users live by using the limited vocabulary of the page you are on
 
 - Leave a message for whoever to find. Perhaps a poem, a cryptic entry or a confession for your crush
 
