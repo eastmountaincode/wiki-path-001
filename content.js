@@ -145,9 +145,58 @@ function start() {
   // Start on first word
   highlightWord(0);
   
+  // Initiate some tone stuff
+  let toneInitiated = false;
+  let synth;
+  
   // Handle movement commands
   function handleCommand(command) {
-    Tone.start();
+    if (!toneInitiated) {
+      Tone.start();
+          // Tone stuff
+                // Play a note from that synth
+        const reverb = new Tone.Reverb({
+          decay: 7, // Adjust decay time as desired
+          preDelay: 0.01, // Adjust preDelay as desired
+          wet: 0.8, // Adjust wet/dry mix as desired
+        }).toDestination(); // Connect the reverb to the master output
+            // Create the appropriate synth based on instrument type
+        switch(userInstrument) {
+          case 'AMSynth':
+            synth = new Tone.AMSynth().toDestination();
+            break;
+          case 'DuoSynth':
+            synth = new Tone.DuoSynth().toDestination();
+            break;
+          case 'FMSynth':
+            synth = new Tone.FMSynth().toDestination();
+            break;
+          case 'MembraneSynth':
+            synth = new Tone.MembraneSynth().toDestination();
+            break;
+          case 'MetalSynth':
+            synth = new Tone.MetalSynth().toDestination();
+            break;
+          case 'MonoSynth':
+            synth = new Tone.MonoSynth().toDestination();
+            break;
+          case 'NoiseSynth':
+            synth = new Tone.NoiseSynth().toDestination();
+            break;
+          case 'PluckSynth':
+            synth = new Tone.PluckSynth().toDestination();
+            break;
+          case 'PolySynth':
+            synth = new Tone.PolySynth().toDestination();
+            break;
+          case 'Synth':
+          default:
+            synth = new Tone.Synth().toDestination();
+            break;
+        }
+      synth.connect(reverb);
+      toneInitiated = true;
+    }
     const currentWord = wordData[currentIndex];
     if (command === 'left') {
       // Find previous word on same line
@@ -477,58 +526,20 @@ function start() {
     // Append the button to the page's body
     document.body.prepend(replaySelectedButton);
 
-    // Tone stuff
+      // Tone stuff
+
       function playNote(currentIndex, command, line, instrument = userInstrument) {
         const noteWord = words[currentIndex].textContent;
         const direction = command;
         const depth = line;
 
         const noteLength = noteWord.length * 0.05;
-        const noteOctave = depth % 4;
+        const noteOctave = depth % 4 + 1;
         const noteNumber = currentIndex % 5;
         const noteMap = ['A', 'C', 'D', 'E', 'G'];
 
         console.log(noteMap[noteNumber], noteOctave, 'instrument:', instrument);
-        
-        Tone.start();
-        
-        // Create the appropriate synth based on instrument type
-        let synth;
-        switch(instrument) {
-          case 'AMSynth':
-            synth = new Tone.AMSynth().toDestination();
-            break;
-          case 'DuoSynth':
-            synth = new Tone.DuoSynth().toDestination();
-            break;
-          case 'FMSynth':
-            synth = new Tone.FMSynth().toDestination();
-            break;
-          case 'MembraneSynth':
-            synth = new Tone.MembraneSynth().toDestination();
-            break;
-          case 'MetalSynth':
-            synth = new Tone.MetalSynth().toDestination();
-            break;
-          case 'MonoSynth':
-            synth = new Tone.MonoSynth().toDestination();
-            break;
-          case 'NoiseSynth':
-            synth = new Tone.NoiseSynth().toDestination();
-            break;
-          case 'PluckSynth':
-            synth = new Tone.PluckSynth().toDestination();
-            break;
-          case 'PolySynth':
-            synth = new Tone.PolySynth().toDestination();
-            break;
-          case 'Synth':
-          default:
-            synth = new Tone.Synth().toDestination();
-            break;
-        }
-        
-        // Play a note from that synth
+
         synth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
 	}
 }
