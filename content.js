@@ -394,8 +394,8 @@ function start() {
   function replayPathWithTimeout(indexArray, index = 0, spoken = false) {
     if (index < indexArray.length) {
       const replayIndex = indexArray[index];
-          console.log(replayIndex);
       if (words[replayIndex]) {
+      playNote(replayIndex, 'none', wordData[index].line);
       //words[index].style.fontWeight = 'bold';
       words[replayIndex].style.backgroundColor = userColor;
       words[replayIndex].style.filter = 'invert(75%)'
