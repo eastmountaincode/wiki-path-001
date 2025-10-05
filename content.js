@@ -28,6 +28,9 @@ function start() {
   let overlapTimer = null;
   let lastOverlapHref = null;
 
+  // Track which two words are being overlap-highlighted (so we don't fade them)
+  let overlapLocked = { mine: -1, theirs: -1 };
+
   // WebSocket connection
   const SOCKET_SERVER = "https://wiki-path.freewaterhouse.com";
   let socket = null;
@@ -90,6 +93,34 @@ function start() {
     tts,
     userColor
   );
+  function lockOverlap(myIdx, otherIdx) {
+    const a = words[myIdx];
+    const b = words[otherIdx];
+    if (a) {
+      a.dataset.lock = "overlap";
+      a.style.transition = "none";
+      a.style.backgroundColor = "red";
+    }
+    if (b) {
+      b.dataset.lock = "overlap";
+      b.style.transition = "none";
+      b.style.backgroundColor = "red";
+    }
+    overlapLocked.mine = myIdx;
+    overlapLocked.theirs = otherIdx;
+  }
+
+  function clearOverlapLock() {
+    [overlapLocked.mine, overlapLocked.theirs].forEach((idx) => {
+      const el = words[idx];
+      if (el) {
+        delete el.dataset.lock;
+        el.style.transition = "background-color 1s ease-out";
+        el.style.backgroundColor = "white";
+      }
+    });
+    overlapLocked.mine = overlapLocked.theirs = -1;
+  }
 
   // Highlight current word
   function highlightWord(index) {
@@ -130,17 +161,19 @@ function start() {
   // Highlight other users' positions
   function highlightOtherUser(wordIndex, color) {
     if (wordIndex >= 0 && wordIndex < words.length) {
-      // Set instant color change (no transition on applying color)
-      words[wordIndex].style.transition = "none";
-      words[wordIndex].style.backgroundColor = color;
+      const el = words[wordIndex];
 
-      // Enable transition and fade to white over 1 second
+      // If this word is currently "locked" by an overlap, don't wash it out.
+      if (el && el.dataset.lock === "overlap") return;
+
+      el.style.transition = "none";
+      el.style.backgroundColor = color;
+
       setTimeout(() => {
-        if (words[wordIndex]) {
-          words[wordIndex].style.transition = "background-color 1s ease-out";
-          words[wordIndex].style.backgroundColor = "white";
-        }
-      }, 10); // Small delay to ensure transition applies
+        if (!el || el.dataset.lock === "overlap") return; // keep overlap red
+        el.style.transition = "background-color 1s ease-out";
+        el.style.backgroundColor = "white";
+      }, 10);
     }
   }
 
@@ -455,52 +488,52 @@ function start() {
     socket.on("user-moved", (data) => {
       const { id, color, instrument, position, line } = data;
 
-      // Update other user
-      if (!otherUsers[id]) {
+      // Track other user
+      if (!otherUsers[id])
         otherUsers[id] = { id, color, instrument, trail: [] };
-      }
       otherUsers[id].position = position;
       otherUsers[id].instrument = instrument;
       if (!otherUsers[id].trail) otherUsers[id].trail = [];
       otherUsers[id].trail.push(position);
 
+      // Usual visuals/sound for their move
       highlightOtherUser(position, color);
       synthController.playNote(position, words, wordData, instrument);
 
-      // --- 🔥 NEW: Check overlap on the same link
+      // ---- Overlap logic (same hyperlink) ----
       const myLink = wordToLinkMap.get(currentIndex);
       const otherLink = wordToLinkMap.get(position);
+      const sameLink = myLink && otherLink && myLink === otherLink;
 
-      if (myLink && otherLink && myLink === otherLink) {
-        const href = myLink.getAttribute("href");
-        
-        // Add visual indicator
-        myLink.style.outline = "3px solid #00FF99"; // glowing green border
+      if (sameLink) {
+        // Make both words red and lock them so they don't fade
+        lockOverlap(currentIndex, position);
 
-        if (href && href !== lastOverlapHref) {
-          lastOverlapHref = href;
+        // Use absolute href so redirects are reliable on Wikipedia
+        const href = myLink.href;
 
-          // Clear existing timer to prevent multiple redirects
-          if (overlapTimer) clearTimeout(overlapTimer);
+        // Restart a shared 3s timer -> then broadcast redirect to the whole room
+        if (overlapTimer) clearTimeout(overlapTimer);
+        overlapTimer = setTimeout(() => {
+          socket.emit("redirect-link", { href }); // ask server to broadcast
+        }, 3000);
 
-          // Wait 2 seconds of sustained overlap
-          overlapTimer = setTimeout(() => {
-            console.log(`🔗 Redirecting both users to ${href}`);
-            window.location.href = href;
-          }, 2000);
-        }
+        lastOverlapHref = href;
       } else {
-        // Reset if users move apart
+        // Users separated: cancel timer and unlock visuals
         if (overlapTimer) {
           clearTimeout(overlapTimer);
           overlapTimer = null;
           lastOverlapHref = null;
         }
-        // Remove outline when users separate
-        const myLink = wordToLinkMap.get(currentIndex);
-        if (myLink) {
-          myLink.style.outline = "";
-        }
+        clearOverlapLock();
+      }
+    });
+    socket.on("redirect-link", ({ href }) => {
+      // Optional safety: only redirect if you're *still* on that link
+      const myLinkNow = wordToLinkMap.get(currentIndex);
+      if (myLinkNow && myLinkNow.href === href) {
+        window.location.href = href;
       }
     });
 
@@ -607,14 +640,23 @@ function start() {
     // Get all saved selected paths from server
     const savedPaths = Object.values(savedSelectedPaths);
     if (savedPaths.length > 0) {
-      const randomPath = savedPaths[Math.floor(Math.random() * savedPaths.length)];
-      console.log("🎲 Replaying random selected path from server:", randomPath.selectedWords.length, "words");
-      pathReplayer.replayServerSelectedWords(randomPath.selectedWords, randomPath.color);
+      const randomPath =
+        savedPaths[Math.floor(Math.random() * savedPaths.length)];
+      console.log(
+        "🎲 Replaying random selected path from server:",
+        randomPath.selectedWords.length,
+        "words"
+      );
+      pathReplayer.replayServerSelectedWords(
+        randomPath.selectedWords,
+        randomPath.color
+      );
     } else {
       console.log("⚠️ No saved selected paths from server");
       replayServerSelectedButton.innerText = "No saved paths!";
       setTimeout(() => {
-        replayServerSelectedButton.innerText = "Replay Random Selected (Server)";
+        replayServerSelectedButton.innerText =
+          "Replay Random Selected (Server)";
       }, 2000);
     }
   });
