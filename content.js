@@ -97,10 +97,10 @@ function start() {
   function lockOverlap(myIdx, otherIdx) {
     const a = words[myIdx];
     const b = words[otherIdx];
-    
+
     // Get the shared link element
     const myLink = wordToLinkMap.get(myIdx);
-    
+
     if (a) {
       a.dataset.lock = "overlap";
       a.style.transition = "none";
@@ -111,14 +111,14 @@ function start() {
       b.style.transition = "none";
       b.style.backgroundColor = "red";
     }
-    
+
     // Add animated hands to the LINK once (not each word)
     if (myLink && !myLink._hasEmojis) {
       // Container to center the hands
       const handContainer = document.createElement("span");
       handContainer.style.display = "inline-block";
       handContainer.style.position = "relative";
-      
+
       // Left hand 🫱 (pointing right) - starts from left, moves to center
       const leftHand = document.createElement("span");
       leftHand.textContent = "🫱";
@@ -126,7 +126,7 @@ function start() {
       leftHand.style.position = "absolute";
       leftHand.style.left = "-40px";
       leftHand.style.transition = "left 3s linear";
-      
+
       // Right hand 🫲 (pointing left) - starts from right, moves to center
       const rightHand = document.createElement("span");
       rightHand.textContent = "🫲";
@@ -134,10 +134,10 @@ function start() {
       rightHand.style.position = "absolute";
       rightHand.style.left = "40px";
       rightHand.style.transition = "left 3s linear";
-      
+
       handContainer.appendChild(leftHand);
       handContainer.appendChild(rightHand);
-      
+
       // Insert container in the middle of the link
       const firstChild = myLink.firstChild;
       if (firstChild) {
@@ -145,17 +145,17 @@ function start() {
       } else {
         myLink.appendChild(handContainer);
       }
-      
+
       // Start animation after a brief delay (so transition applies)
       setTimeout(() => {
         leftHand.style.left = "0px";
         rightHand.style.left = "0px";
       }, 10);
-      
+
       myLink._hasEmojis = true;
       myLink._handContainer = handContainer;
     }
-    
+
     overlapLocked.mine = myIdx;
     overlapLocked.theirs = otherIdx;
   }
@@ -163,7 +163,7 @@ function start() {
   function clearOverlapLock() {
     // Get the link from one of the locked word indices
     const myLink = wordToLinkMap.get(overlapLocked.mine);
-    
+
     // Clear word styling
     [overlapLocked.mine, overlapLocked.theirs].forEach((idx) => {
       const el = words[idx];
@@ -173,7 +173,7 @@ function start() {
         el.style.backgroundColor = "white";
       }
     });
-    
+
     // Remove animated hands from the LINK
     if (myLink && myLink._hasEmojis) {
       const handContainer = myLink._handContainer;
@@ -183,7 +183,7 @@ function start() {
       delete myLink._hasEmojis;
       delete myLink._handContainer;
     }
-    
+
     overlapLocked.mine = overlapLocked.theirs = -1;
   }
 
@@ -198,7 +198,10 @@ function start() {
 
       // Fade previous word (if not locked or selected)
       if (words[lastIndex] && lastIndex !== currentIndex) {
-        if (words[lastIndex].dataset.lock !== "overlap" && !selectedWordIndexes.includes(lastIndex)) {
+        if (
+          words[lastIndex].dataset.lock !== "overlap" &&
+          !selectedWordIndexes.includes(lastIndex)
+        ) {
           words[lastIndex].style.transition = "background-color 1s ease-out";
           words[lastIndex].style.backgroundColor = "white";
         }
@@ -231,8 +234,15 @@ function start() {
       const lastPosition = user ? user.lastPosition : null;
 
       // Fade previous position (if not locked or selected)
-      if (lastPosition !== null && lastPosition !== wordIndex && words[lastPosition]) {
-        if (words[lastPosition].dataset.lock !== "overlap" && !selectedWordIndexes.includes(lastPosition)) {
+      if (
+        lastPosition !== null &&
+        lastPosition !== wordIndex &&
+        words[lastPosition]
+      ) {
+        if (
+          words[lastPosition].dataset.lock !== "overlap" &&
+          !selectedWordIndexes.includes(lastPosition)
+        ) {
           words[lastPosition].style.transition = "background-color 1s ease-out";
           words[lastPosition].style.backgroundColor = "white";
         }
@@ -589,12 +599,12 @@ function start() {
         // Only process if this is a new overlap
         if (lastOverlapHref !== href) {
           // Broadcast overlap start to everyone in the room
-          socket.emit("overlap-start", { 
+          socket.emit("overlap-start", {
             href: href,
             myIndex: currentIndex,
-            otherIndex: position
+            otherIndex: position,
           });
-          
+
           lastOverlapHref = href;
         }
 
@@ -616,7 +626,7 @@ function start() {
           overlapTimer = null;
           lastOverlapHref = null;
           pendingRedirectHref = null; // Clear pending redirect
-          
+
           // Broadcast overlap end to everyone
           socket.emit("overlap-end");
         }
@@ -650,7 +660,9 @@ function start() {
         console.log(`🔗 Redirecting to ${href}`);
         window.location.href = href;
       } else {
-        console.log(`⚠️ Ignoring redirect to ${href} - not part of this overlap`);
+        console.log(
+          `⚠️ Ignoring redirect to ${href} - not part of this overlap`
+        );
       }
     });
 
@@ -718,19 +730,20 @@ function start() {
     button.style.bottom = bottomPosition;
     button.style.right = "10px";
     button.style.zIndex = "9999";
-    button.style.backgroundColor = "white";
-    button.style.color = "black";
-    button.style.padding = "10px 15px";
+    button.style.backgroundColor = "#f8f9fa";
+    button.style.color = "#202122";
+    button.style.padding = "1px 12px";
+    button.style.minHeight = "32px";
     button.style.border = "1px solid black";
-    button.style.borderRadius = "4px";
+    button.style.borderRadius = "2px";
     button.style.cursor = "pointer";
     button.style.minWidth = "150px";
-    button.style.fontFamily = "monospace";
+    button.style.fontFamily = "sans-serif";
   };
 
   // Replay Path button
   const replayPathButton = document.createElement("button");
-  replayPathButton.innerText = "Replay Path (Local)";
+  replayPathButton.innerText = "Replay my path";
   replayPathButton.id = "replayPathButton";
   styleButton(replayPathButton, "190px");
   replayPathButton.addEventListener("click", () => {
@@ -740,7 +753,7 @@ function start() {
 
   // Replay Selected button
   const replaySelectedButton = document.createElement("button");
-  replaySelectedButton.innerText = "Replay Selected (Local)";
+  replaySelectedButton.innerText = "Replay my words";
   replaySelectedButton.id = "replaySelectedButton";
   styleButton(replaySelectedButton, "130px");
   replaySelectedButton.addEventListener("click", () => {
@@ -750,7 +763,7 @@ function start() {
 
   // Replay Random Selected from Server button
   const replayServerSelectedButton = document.createElement("button");
-  replayServerSelectedButton.innerText = "Replay Random Selected (Server)";
+  replayServerSelectedButton.innerText = "Play their words";
   replayServerSelectedButton.id = "replayServerSelectedButton";
   styleButton(replayServerSelectedButton, "70px");
   replayServerSelectedButton.addEventListener("click", () => {
