@@ -152,6 +152,15 @@ function start() {
   
   // Initiate some tone stuff
   let toneInitiated = false;
+  let AMSynth;
+  let DuoSynth;
+  let FMSynth;
+  let MembraneSynth;
+  let MetalSynth;
+  let MonoSynth;
+  let NoiseSynth;
+  let PluckSynth;
+  let PolySynth;
   let synth;
   
   // Handle movement commands
@@ -166,39 +175,17 @@ function start() {
           wet: 0.8, // Adjust wet/dry mix as desired
         }).toDestination(); // Connect the reverb to the master output
             // Create the appropriate synth based on instrument type
-        switch(userInstrument) {
-          case 'AMSynth':
-            synth = new Tone.AMSynth().toDestination();
-            break;
-          case 'DuoSynth':
-            synth = new Tone.DuoSynth().toDestination();
-            break;
-          case 'FMSynth':
-            synth = new Tone.FMSynth().toDestination();
-            break;
-          case 'MembraneSynth':
-            synth = new Tone.MembraneSynth().toDestination();
-            break;
-          case 'MetalSynth':
-            synth = new Tone.MetalSynth().toDestination();
-            break;
-          case 'MonoSynth':
-            synth = new Tone.MonoSynth().toDestination();
-            break;
-          case 'NoiseSynth':
-            synth = new Tone.NoiseSynth().toDestination();
-            break;
-          case 'PluckSynth':
-            synth = new Tone.PluckSynth().toDestination();
-            break;
-          case 'PolySynth':
-            synth = new Tone.PolySynth().toDestination();
-            break;
-          case 'Synth':
-          default:
-            synth = new Tone.Synth().toDestination();
-            break;
-        }
+            AMSynth = new Tone.AMSynth().toDestination().connect(reverb);
+            DuoSynth = new Tone.DuoSynth().toDestination().connect(reverb);
+            FMSynth = new Tone.FMSynth().toDestination().connect(reverb);
+            MembraneSynth = new Tone.MembraneSynth().toDestination().connect(reverb);
+            MetalSynth = new Tone.MetalSynth().toDestination().connect(reverb);
+            MonoSynth = new Tone.MonoSynth().toDestination().connect(reverb);
+            NoiseSynth = new Tone.NoiseSynth().toDestination().connect(reverb);
+            PluckSynth = new Tone.PluckSynth().toDestination().connect(reverb);
+            PolySynth = new Tone.PolySynth().toDestination().connect(reverb);
+            synth = new Tone.Synth().toDestination().connect(reverb);
+        
       synth.connect(reverb);
       toneInitiated = true;
     }
@@ -552,7 +539,40 @@ function start() {
 
         console.log(noteMap[noteNumber], noteOctave, 'instrument:', instrument);
 
-        synth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
-	}
-}
+         switch(instrument) {
+          case 'AMSynth':
+            AMSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+            break;
+          case 'DuoSynth':
+            DuoSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+            break;
+          case 'FMSynth':
+            FMSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+            break;
+          case 'MembraneSynth':
+            MembraneSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+            break;
+          case 'MetalSynth':
+            MetalSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+            break;
+          case 'MonoSynth':
+            MonoSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+            break;
+          case 'NoiseSynth':
+            NoiseSytnh.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+            break;
+          case 'PluckSynth':
+            PluckSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+            break;
+          case 'PolySynth':
+            DuoSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+            break;
+          case 'Synth':
+          default:
+            synth = new Tone.Synth().toDestination();
+            break;
+        }
 
+        synth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+      }
+    }
