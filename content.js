@@ -471,9 +471,19 @@ function start() {
       if (words[replayIndex]) {
       playNote(replayIndex, 'none', wordData[index].line);
       //words[index].style.fontWeight = 'bold';
+      words[replayIndex].style.transition = 'none';
       words[replayIndex].style.backgroundColor = userColor;
       words[replayIndex].style.filter = 'invert(75%)'
       words[replayIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      
+      // Enable transition and fade to white over 1 second
+      setTimeout(() => {
+        if (words[replayIndex]) {
+          words[replayIndex].style.transition = 'background-color 1s ease-out';
+          words[replayIndex].style.backgroundColor = 'white';
+        }
+      }, 10);
+      
       if (spoken) {
         console.log('speaking', words[replayIndex]);
         tts.speak(words[replayIndex].textContent);
