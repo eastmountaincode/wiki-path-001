@@ -97,104 +97,93 @@ function start() {
   function lockOverlap(myIdx, otherIdx) {
     const a = words[myIdx];
     const b = words[otherIdx];
+    
+    // Get the shared link element
+    const myLink = wordToLinkMap.get(myIdx);
+    
     if (a) {
       a.dataset.lock = "overlap";
       a.style.transition = "none";
       a.style.backgroundColor = "red";
-      
-      // Add animated hand emojis around the word
-      if (!a._hasEmojis) {
-        // Left hand (starts far left, moves right)
-        const leftHand = document.createElement("span");
-        leftHand.textContent = "🫲";
-        leftHand.style.display = "inline-block";
-        leftHand.style.transform = "translateX(-30px)";
-        leftHand.style.transition = "transform 3s linear";
-        
-        // Right hand (starts far right, moves left)
-        const rightHand = document.createElement("span");
-        rightHand.textContent = "🫱";
-        rightHand.style.display = "inline-block";
-        rightHand.style.transform = "translateX(30px)";
-        rightHand.style.transition = "transform 3s linear";
-        
-        a.parentNode.insertBefore(leftHand, a);
-        a.parentNode.insertBefore(rightHand, a.nextSibling);
-        
-        // Start animation after a brief delay (so transition applies)
-        setTimeout(() => {
-          leftHand.style.transform = "translateX(0px)";
-          rightHand.style.transform = "translateX(0px)";
-        }, 10);
-        
-        a._hasEmojis = true;
-        a._leftHand = leftHand;
-        a._rightHand = rightHand;
-      }
     }
     if (b) {
       b.dataset.lock = "overlap";
       b.style.transition = "none";
       b.style.backgroundColor = "red";
-      
-      // Add animated hand emojis around the word
-      if (!b._hasEmojis) {
-        // Left hand (starts far left, moves right)
-        const leftHand = document.createElement("span");
-        leftHand.textContent = "🫲";
-        leftHand.style.display = "inline-block";
-        leftHand.style.transform = "translateX(-30px)";
-        leftHand.style.transition = "transform 3s linear";
-        
-        // Right hand (starts far right, moves left)
-        const rightHand = document.createElement("span");
-        rightHand.textContent = "🫱";
-        rightHand.style.display = "inline-block";
-        rightHand.style.transform = "translateX(30px)";
-        rightHand.style.transition = "transform 3s linear";
-        
-        b.parentNode.insertBefore(leftHand, b);
-        b.parentNode.insertBefore(rightHand, b.nextSibling);
-        
-        // Start animation after a brief delay (so transition applies)
-        setTimeout(() => {
-          leftHand.style.transform = "translateX(0px)";
-          rightHand.style.transform = "translateX(0px)";
-        }, 10);
-        
-        b._hasEmojis = true;
-        b._leftHand = leftHand;
-        b._rightHand = rightHand;
-      }
     }
+    
+    // Add animated hands to the LINK once (not each word)
+    if (myLink && !myLink._hasEmojis) {
+      // Container to center the hands
+      const handContainer = document.createElement("span");
+      handContainer.style.display = "inline-block";
+      handContainer.style.position = "relative";
+      
+      // Left hand 🫱 (pointing right) - starts from left, moves to center
+      const leftHand = document.createElement("span");
+      leftHand.textContent = "🫱";
+      leftHand.style.display = "inline-block";
+      leftHand.style.position = "absolute";
+      leftHand.style.left = "-40px";
+      leftHand.style.transition = "left 3s linear";
+      
+      // Right hand 🫲 (pointing left) - starts from right, moves to center
+      const rightHand = document.createElement("span");
+      rightHand.textContent = "🫲";
+      rightHand.style.display = "inline-block";
+      rightHand.style.position = "absolute";
+      rightHand.style.left = "40px";
+      rightHand.style.transition = "left 3s linear";
+      
+      handContainer.appendChild(leftHand);
+      handContainer.appendChild(rightHand);
+      
+      // Insert container in the middle of the link
+      const firstChild = myLink.firstChild;
+      if (firstChild) {
+        myLink.insertBefore(handContainer, firstChild);
+      } else {
+        myLink.appendChild(handContainer);
+      }
+      
+      // Start animation after a brief delay (so transition applies)
+      setTimeout(() => {
+        leftHand.style.left = "0px";
+        rightHand.style.left = "0px";
+      }, 10);
+      
+      myLink._hasEmojis = true;
+      myLink._handContainer = handContainer;
+    }
+    
     overlapLocked.mine = myIdx;
     overlapLocked.theirs = otherIdx;
   }
 
   function clearOverlapLock() {
+    // Get the link from one of the locked word indices
+    const myLink = wordToLinkMap.get(overlapLocked.mine);
+    
+    // Clear word styling
     [overlapLocked.mine, overlapLocked.theirs].forEach((idx) => {
       const el = words[idx];
       if (el) {
         delete el.dataset.lock;
         el.style.transition = "background-color 1s ease-out";
         el.style.backgroundColor = "white";
-        
-        // Remove animated hand emojis
-        if (el._hasEmojis) {
-          const leftHand = el._leftHand;
-          const rightHand = el._rightHand;
-          if (leftHand && leftHand.parentNode) {
-            leftHand.parentNode.removeChild(leftHand);
-          }
-          if (rightHand && rightHand.parentNode) {
-            rightHand.parentNode.removeChild(rightHand);
-          }
-          delete el._hasEmojis;
-          delete el._leftHand;
-          delete el._rightHand;
-        }
       }
     });
+    
+    // Remove animated hands from the LINK
+    if (myLink && myLink._hasEmojis) {
+      const handContainer = myLink._handContainer;
+      if (handContainer && handContainer.parentNode) {
+        handContainer.parentNode.removeChild(handContainer);
+      }
+      delete myLink._hasEmojis;
+      delete myLink._handContainer;
+    }
+    
     overlapLocked.mine = overlapLocked.theirs = -1;
   }
 
@@ -582,11 +571,23 @@ function start() {
       const sameLink = myLink && otherLink && myLink === otherLink;
 
       if (sameLink) {
-        // Make both words red and lock them so they don't fade
-        lockOverlap(currentIndex, position);
-
         // Use absolute href so redirects are reliable on Wikipedia
         const href = myLink.href;
+
+        // Only process if this is a new overlap
+        if (lastOverlapHref !== href) {
+          // Broadcast overlap start to everyone in the room
+          socket.emit("overlap-start", { 
+            href: href,
+            myIndex: currentIndex,
+            otherIndex: position
+          });
+          
+          lastOverlapHref = href;
+        }
+
+        // Make both words red and lock them so they don't fade
+        lockOverlap(currentIndex, position);
 
         // Mark that we should redirect when the broadcast arrives
         pendingRedirectHref = href;
@@ -596,8 +597,6 @@ function start() {
         overlapTimer = setTimeout(() => {
           socket.emit("redirect-link", { href }); // ask server to broadcast
         }, 3000);
-
-        lastOverlapHref = href;
       } else {
         // Users separated: cancel timer and unlock visuals
         if (overlapTimer) {
@@ -605,10 +604,34 @@ function start() {
           overlapTimer = null;
           lastOverlapHref = null;
           pendingRedirectHref = null; // Clear pending redirect
+          
+          // Broadcast overlap end to everyone
+          socket.emit("overlap-end");
         }
         clearOverlapLock();
       }
     });
+    // Overlap started - show hands for both users
+    socket.on("overlap-start", ({ href, myIndex, otherIndex }) => {
+      console.log(`🤝 Overlap started on link: ${href}`);
+      // Find any word in our page that belongs to this href
+      for (let i = 0; i < words.length; i++) {
+        const link = wordToLinkMap.get(i);
+        if (link && link.href === href) {
+          lockOverlap(currentIndex, i);
+          pendingRedirectHref = href;
+          break;
+        }
+      }
+    });
+
+    // Overlap ended - remove hands for both users
+    socket.on("overlap-end", () => {
+      console.log(`👋 Overlap ended`);
+      clearOverlapLock();
+      pendingRedirectHref = null;
+    });
+
     socket.on("redirect-link", ({ href }) => {
       // Redirect if we were part of the overlap (have pending redirect for this href)
       if (pendingRedirectHref === href) {
