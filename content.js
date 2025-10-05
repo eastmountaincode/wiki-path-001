@@ -28,8 +28,8 @@ function start() {
   // WebSocket connection
   const SOCKET_SERVER = 'https://wiki-path.freewaterhouse.com';
   let socket = null;
-  let userColor = null;
-  let userInstrument = 'Synth'; // Default instrument
+  let userColor = '#308557'; // Default color
+  let userInstrument = colorInstrumentMap[userColor]; // Default instrument
   let otherUsers = {}; // Track other users in the room
   
   // Synth instances (created once and reused)
@@ -69,8 +69,10 @@ function start() {
   const wordData = calculator.calculatePositions(words);
   
   // Highlight current word
-  function highlightWord(index) {    
+  function highlightWord(index) {
+    const lastIndex = currentIndex;    
     currentIndex = index;
+    console.log(lastIndex, currentIndex);
     
     if (words[currentIndex]) {
       pathWordIndexes.push(currentIndex);
@@ -82,9 +84,9 @@ function start() {
       
       // Enable transition and fade to white over 1 second
       setTimeout(() => {
-        if (words[index]) {
-          words[index].style.transition = 'background-color 1s ease-out';
-          words[index].style.backgroundColor = 'white';
+        if (words[lastIndex] && lastIndex !== currentIndex) {
+          words[lastIndex].style.transition = 'background-color 1s ease-out';
+          words[lastIndex].style.backgroundColor = 'white';
         }
       }, 10); // Small delay to ensure transition applies
       
