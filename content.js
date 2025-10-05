@@ -10,6 +10,21 @@ if (document.readyState === 'loading') {
 }
 
 function start() {
+  // Color to instrument mapping (matches server)
+  const colorInstrumentMap = {
+    '#970302': 'AMSynth',      // Red
+    '#E679A6': 'DuoSynth',     // Pink
+    '#EE8019': 'FMSynth',      // Orange
+    '#F0BC00': 'MembraneSynth', // Yellow
+    '#5748B5': 'MetalSynth',   // Purple
+    '#305D70': 'MonoSynth',    // Dark green
+    '#0E65C0': 'NoiseSynth',   // Blue
+    '#049DFF': 'PluckSynth',   // Bright Blue
+    '#E9E7C4': 'PolySynth',    // Bright Yellow
+    '#308557': 'Synth',        // Green
+    '#71D1B3': 'FMSynth'       // Bright Green
+  };
+  
   // WebSocket connection
   const SOCKET_SERVER = 'https://wiki-path.freewaterhouse.com';
   let socket = null;
@@ -365,11 +380,11 @@ function start() {
     console.log('⚠️ Multiplayer unavailable:', error.message);
     console.log('💡 Running in single-player mode');
     // Assign random color for single-player
-    const colorPalette = [
-      '#970302', '#E679A6', '#EE8019', '#F0BC00', '#5748B5',
-      '#305D70', '#0E65C0', '#049DFF', '#E9E7C4', '#308557', '#71D1B3'
-    ];
+    const colorPalette = Object.keys(colorInstrumentMap);
     userColor = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+    userInstrument = colorInstrumentMap[userColor];
+    console.log('🎨 Your color:', userColor);
+    console.log('🎸 Your instrument:', userInstrument);
   }
   
   console.log('✨ Ready!');
@@ -483,17 +498,29 @@ function start() {
           case 'AMSynth':
             synth = new Tone.AMSynth().toDestination();
             break;
+          case 'DuoSynth':
+            synth = new Tone.DuoSynth().toDestination();
+            break;
           case 'FMSynth':
             synth = new Tone.FMSynth().toDestination();
             break;
           case 'MembraneSynth':
             synth = new Tone.MembraneSynth().toDestination();
             break;
+          case 'MetalSynth':
+            synth = new Tone.MetalSynth().toDestination();
+            break;
+          case 'MonoSynth':
+            synth = new Tone.MonoSynth().toDestination();
+            break;
+          case 'NoiseSynth':
+            synth = new Tone.NoiseSynth().toDestination();
+            break;
           case 'PluckSynth':
             synth = new Tone.PluckSynth().toDestination();
             break;
-          case 'MetalSynth':
-            synth = new Tone.MetalSynth().toDestination();
+          case 'PolySynth':
+            synth = new Tone.PolySynth().toDestination();
             break;
           case 'Synth':
           default:
