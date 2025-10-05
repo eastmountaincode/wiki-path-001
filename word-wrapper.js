@@ -27,7 +27,7 @@ class WordWrapper {
     
     // Log the navigation area text
     const navigationText = textNodes.map(n => n.textContent).join('');
-    console.log('Navigation area text:', navigationText);
+    //console.log('Navigation area text:', navigationText);
     console.log('Total text nodes:', textNodes.length);
     
     // Wrap each word in each text node with a span
