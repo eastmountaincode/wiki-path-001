@@ -196,21 +196,21 @@ function start() {
     if (words[currentIndex]) {
       pathWordIndexes.push(currentIndex);
 
-      // Set instant color change (no transition on applying color)
+      // Fade previous word (if not locked or selected)
+      if (words[lastIndex] && lastIndex !== currentIndex) {
+        if (words[lastIndex].dataset.lock !== "overlap" && !selectedWordIndexes.includes(lastIndex)) {
+          words[lastIndex].style.transition = "background-color 1s ease-out";
+          words[lastIndex].style.backgroundColor = "white";
+        }
+      }
+
+      // Highlight current word (keep it highlighted, don't fade)
       words[currentIndex].style.transition = "none";
       words[currentIndex].style.backgroundColor = userColor;
       words[currentIndex].scrollIntoView({
         block: "nearest",
         inline: "nearest",
       });
-
-      // Enable transition and fade to white over 1 second
-      setTimeout(() => {
-        if (words[lastIndex] && lastIndex !== currentIndex) {
-          words[lastIndex].style.transition = "background-color 1s ease-out";
-          words[lastIndex].style.backgroundColor = "white";
-        }
-      }, 10); // Small delay to ensure transition applies
 
       // Send position update to other users
       if (socket && wordData[currentIndex]) {
@@ -223,22 +223,32 @@ function start() {
     }
   }
 
-  // Highlight other users' positions
-  function highlightOtherUser(wordIndex, color) {
+  // Highlight other users' positions (keep current highlighted, fade previous)
+  function highlightOtherUser(userId, wordIndex, color) {
     if (wordIndex >= 0 && wordIndex < words.length) {
+      // Get user's previous position
+      const user = otherUsers[userId];
+      const lastPosition = user ? user.lastPosition : null;
+
+      // Fade previous position (if not locked or selected)
+      if (lastPosition !== null && lastPosition !== wordIndex && words[lastPosition]) {
+        if (words[lastPosition].dataset.lock !== "overlap" && !selectedWordIndexes.includes(lastPosition)) {
+          words[lastPosition].style.transition = "background-color 1s ease-out";
+          words[lastPosition].style.backgroundColor = "white";
+        }
+      }
+
+      // Highlight current position (keep it highlighted, don't fade)
       const el = words[wordIndex];
+      if (el && el.dataset.lock !== "overlap") {
+        el.style.transition = "none";
+        el.style.backgroundColor = color;
+      }
 
-      // If this word is currently "locked" by an overlap, don't wash it out.
-      if (el && el.dataset.lock === "overlap") return;
-
-      el.style.transition = "none";
-      el.style.backgroundColor = color;
-
-      setTimeout(() => {
-        if (!el || el.dataset.lock === "overlap") return; // keep overlap red
-        el.style.transition = "background-color 1s ease-out";
-        el.style.backgroundColor = "white";
-      }, 10);
+      // Update user's last position
+      if (user) {
+        user.lastPosition = wordIndex;
+      }
     }
   }
 
@@ -500,7 +510,7 @@ function start() {
       Object.values(users).forEach((user) => {
         if (user.id !== socket.id && user.trail) {
           user.trail.forEach((wordIndex) => {
-            highlightOtherUser(wordIndex, user.color);
+            highlightOtherUser(user.id, wordIndex, user.color);
           });
         }
       });
@@ -562,7 +572,7 @@ function start() {
       otherUsers[id].trail.push(position);
 
       // Usual visuals/sound for their move
-      highlightOtherUser(position, color);
+      highlightOtherUser(id, position, color);
       synthController.playNote(position, words, wordData, instrument);
 
       // ---- Overlap logic (same hyperlink) ----
