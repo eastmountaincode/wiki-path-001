@@ -14,6 +14,7 @@ function start() {
   const SOCKET_SERVER = 'https://wiki-path.freewaterhouse.com';
   let socket = null;
   let userColor = null;
+  let userInstrument = 'Synth'; // Default instrument
   let otherUsers = {}; // Track other users in the room
   
   // Initialize path storage arrays
@@ -258,6 +259,12 @@ function start() {
       }
     });
     
+    // Receive assigned instrument from server
+    socket.on('user-instrument', (instrument) => {
+      userInstrument = instrument;
+      console.log('🎸 Your instrument:', userInstrument);
+    });
+    
     // Receive current users in room
     socket.on('room-users', (users) => {
       console.log('👥 Users in room:', Object.keys(users).length);
@@ -297,13 +304,14 @@ function start() {
     
     // Another user moved
     socket.on('user-moved', (data) => {
-      const { id, color, position, line } = data;
+      const { id, color, instrument, position, line } = data;
       
       // Update user data
       if (!otherUsers[id]) {
-        otherUsers[id] = { id, color, trail: [] };
+        otherUsers[id] = { id, color, instrument, trail: [] };
       }
       otherUsers[id].position = position;
+      otherUsers[id].instrument = instrument;
       if (!otherUsers[id].trail) {
         otherUsers[id].trail = [];
       }
@@ -312,8 +320,8 @@ function start() {
       // Highlight their new position
       highlightOtherUser(position, color);
       
-      // Play note for other user's movement
-      playNote(position, 'other-user', line);
+      // Play note for other user's movement with their instrument
+      playNote(position, 'other-user', line, instrument);
     });
     
     // Another user selected a word
@@ -455,8 +463,7 @@ function start() {
     document.body.prepend(replaySelectedButton);
 
     // Tone stuff
-      function playNote(currentIndex, command, line) {
-        // TODO: Send event to socket
+      function playNote(currentIndex, command, line, instrument = userInstrument) {
         const noteWord = words[currentIndex].textContent;
         const direction = command;
         const depth = line;
@@ -466,13 +473,36 @@ function start() {
         const noteNumber = currentIndex % 5;
         const noteMap = ['A', 'C', 'D', 'E', 'G'];
 
-        console.log(noteMap[noteNumber], noteOctave);
+        console.log(noteMap[noteNumber], noteOctave, 'instrument:', instrument);
         
         Tone.start();
-				// create a synth
-				const synth = new Tone.Synth().toDestination();
-				// play a note from that synth
-				synth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+        
+        // Create the appropriate synth based on instrument type
+        let synth;
+        switch(instrument) {
+          case 'AMSynth':
+            synth = new Tone.AMSynth().toDestination();
+            break;
+          case 'FMSynth':
+            synth = new Tone.FMSynth().toDestination();
+            break;
+          case 'MembraneSynth':
+            synth = new Tone.MembraneSynth().toDestination();
+            break;
+          case 'PluckSynth':
+            synth = new Tone.PluckSynth().toDestination();
+            break;
+          case 'MetalSynth':
+            synth = new Tone.MetalSynth().toDestination();
+            break;
+          case 'Synth':
+          default:
+            synth = new Tone.Synth().toDestination();
+            break;
+        }
+        
+        // Play a note from that synth
+        synth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
 	}
 }
 

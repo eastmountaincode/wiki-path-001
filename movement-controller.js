@@ -17,10 +17,20 @@ class MovementController {
   handleKeyDown(e) {
     const key = e.key.toLowerCase();
     
-    // Only handle WASD
+    // Only handle WASD + E
     if (!['w', 'a', 's', 'd', 'e'].includes(key)) return;
     
     //e.preventDefault();
+    
+    // Handle 'e' key immediately (no repeat)
+    if (key === 'e') {
+      // Only trigger if not already pressed (prevent repeat)
+      if (!this.keysPressed.has('e')) {
+        this.onCommand('select');
+        this.keysPressed.add(key);
+      }
+      return;
+    }
     
     const wasEmpty = this.keysPressed.size === 0;
     
@@ -79,7 +89,6 @@ class MovementController {
     const hasA = this.keysPressed.has('a');
     const hasS = this.keysPressed.has('s');
     const hasD = this.keysPressed.has('d');
-    const hasE = this.keysPressed.has('e');
     
     // Diagonal movements (two keys pressed)
     if (hasW && hasA) {
@@ -100,9 +109,8 @@ class MovementController {
       this.onCommand('down');
     } else if (hasD) {
       this.onCommand('right');
-    } else if (hasE) {
-      this.onCommand('select');
     }
+    // Note: 'e' key handled separately in handleKeyDown (no repeat)
   }
 }
 
