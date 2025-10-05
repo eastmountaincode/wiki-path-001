@@ -27,6 +27,7 @@ function start() {
 
   let overlapTimer = null;
   let lastOverlapHref = null;
+  let pendingRedirectHref = null; // Track if we should redirect when broadcast arrives
 
   // Track which two words are being overlap-highlighted (so we don't fade them)
   let overlapLocked = { mine: -1, theirs: -1 };
@@ -100,11 +101,71 @@ function start() {
       a.dataset.lock = "overlap";
       a.style.transition = "none";
       a.style.backgroundColor = "red";
+      
+      // Add animated hand emojis around the word
+      if (!a._hasEmojis) {
+        // Left hand (starts far left, moves right)
+        const leftHand = document.createElement("span");
+        leftHand.textContent = "🫲";
+        leftHand.style.display = "inline-block";
+        leftHand.style.transform = "translateX(-30px)";
+        leftHand.style.transition = "transform 3s linear";
+        
+        // Right hand (starts far right, moves left)
+        const rightHand = document.createElement("span");
+        rightHand.textContent = "🫱";
+        rightHand.style.display = "inline-block";
+        rightHand.style.transform = "translateX(30px)";
+        rightHand.style.transition = "transform 3s linear";
+        
+        a.parentNode.insertBefore(leftHand, a);
+        a.parentNode.insertBefore(rightHand, a.nextSibling);
+        
+        // Start animation after a brief delay (so transition applies)
+        setTimeout(() => {
+          leftHand.style.transform = "translateX(0px)";
+          rightHand.style.transform = "translateX(0px)";
+        }, 10);
+        
+        a._hasEmojis = true;
+        a._leftHand = leftHand;
+        a._rightHand = rightHand;
+      }
     }
     if (b) {
       b.dataset.lock = "overlap";
       b.style.transition = "none";
       b.style.backgroundColor = "red";
+      
+      // Add animated hand emojis around the word
+      if (!b._hasEmojis) {
+        // Left hand (starts far left, moves right)
+        const leftHand = document.createElement("span");
+        leftHand.textContent = "🫲";
+        leftHand.style.display = "inline-block";
+        leftHand.style.transform = "translateX(-30px)";
+        leftHand.style.transition = "transform 3s linear";
+        
+        // Right hand (starts far right, moves left)
+        const rightHand = document.createElement("span");
+        rightHand.textContent = "🫱";
+        rightHand.style.display = "inline-block";
+        rightHand.style.transform = "translateX(30px)";
+        rightHand.style.transition = "transform 3s linear";
+        
+        b.parentNode.insertBefore(leftHand, b);
+        b.parentNode.insertBefore(rightHand, b.nextSibling);
+        
+        // Start animation after a brief delay (so transition applies)
+        setTimeout(() => {
+          leftHand.style.transform = "translateX(0px)";
+          rightHand.style.transform = "translateX(0px)";
+        }, 10);
+        
+        b._hasEmojis = true;
+        b._leftHand = leftHand;
+        b._rightHand = rightHand;
+      }
     }
     overlapLocked.mine = myIdx;
     overlapLocked.theirs = otherIdx;
@@ -117,6 +178,21 @@ function start() {
         delete el.dataset.lock;
         el.style.transition = "background-color 1s ease-out";
         el.style.backgroundColor = "white";
+        
+        // Remove animated hand emojis
+        if (el._hasEmojis) {
+          const leftHand = el._leftHand;
+          const rightHand = el._rightHand;
+          if (leftHand && leftHand.parentNode) {
+            leftHand.parentNode.removeChild(leftHand);
+          }
+          if (rightHand && rightHand.parentNode) {
+            rightHand.parentNode.removeChild(rightHand);
+          }
+          delete el._hasEmojis;
+          delete el._leftHand;
+          delete el._rightHand;
+        }
       }
     });
     overlapLocked.mine = overlapLocked.theirs = -1;
@@ -512,6 +588,9 @@ function start() {
         // Use absolute href so redirects are reliable on Wikipedia
         const href = myLink.href;
 
+        // Mark that we should redirect when the broadcast arrives
+        pendingRedirectHref = href;
+
         // Restart a shared 3s timer -> then broadcast redirect to the whole room
         if (overlapTimer) clearTimeout(overlapTimer);
         overlapTimer = setTimeout(() => {
@@ -525,15 +604,18 @@ function start() {
           clearTimeout(overlapTimer);
           overlapTimer = null;
           lastOverlapHref = null;
+          pendingRedirectHref = null; // Clear pending redirect
         }
         clearOverlapLock();
       }
     });
     socket.on("redirect-link", ({ href }) => {
-      // Optional safety: only redirect if you're *still* on that link
-      const myLinkNow = wordToLinkMap.get(currentIndex);
-      if (myLinkNow && myLinkNow.href === href) {
+      // Redirect if we were part of the overlap (have pending redirect for this href)
+      if (pendingRedirectHref === href) {
+        console.log(`🔗 Redirecting to ${href}`);
         window.location.href = href;
+      } else {
+        console.log(`⚠️ Ignoring redirect to ${href} - not part of this overlap`);
       }
     });
 
