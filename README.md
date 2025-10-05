@@ -26,20 +26,19 @@ We wanted to offer Wikipedia users a way to enjoy articles together, catch a gli
 
 > Wiki-path requires a Chrome based browser.
 
-##### For the pros
-Terminal installation
+##### Step one
 
-MACOS
-Navigate to the folder you want to upload the extension in.
+- Download the [WikiPath](https://github.com/eastmountaincode/wiki-path-001) zip.
+- Unzip it in a desired location
 
-Git clone 
-https://github.com/eastmountaincode/wiki-path-001
+##### Step two
 
+- Navigate to ```chrome://extensions/``` on your browser.
 
-```chrome://extensions/``` on your browser.
+- Enable developper mode on the top right of your screen.
 
-Enable developper mode on the top right of your screen.
+- Click on load unpacked and navigate to the unzipped folder.
 
-Click on load unpacked and navigate to the cloned folder.
+##### Step three
 
-Enjoy Wikipedia with other users! 👾
+- Enjoy Wikipedia with other users! 👾
