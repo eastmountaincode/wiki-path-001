@@ -824,7 +824,7 @@ function start() {
       replayServerSelectedButton.innerText = "No saved paths!";
       setTimeout(() => {
         replayServerSelectedButton.innerText =
-          "Replay Random Selected (Server)";
+          "Play their words";
       }, 2000);
     }
   });
