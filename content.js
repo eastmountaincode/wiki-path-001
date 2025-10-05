@@ -744,6 +744,16 @@ function start() {
     button.style.cursor = "pointer";
     button.style.minWidth = "150px";
     button.style.fontFamily = "sans-serif";
+    button.style.transition = "background-color 0.2s, color 0.2s";
+    
+    // Add hover effects using event listeners
+    button.addEventListener("mouseenter", () => {
+      button.style.backgroundColor = "#eaecf0";
+    });
+    
+    button.addEventListener("mouseleave", () => {
+      button.style.backgroundColor = "#f8f9fa";
+    });
   };
 
   // Replay Path button
