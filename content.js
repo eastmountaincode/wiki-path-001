@@ -170,23 +170,26 @@ function start() {
       Tone.start();
           // Tone stuff
                 // Play a note from that synth
+        // Create volume control (reduce volume a bit)
+        const volume = new Tone.Volume(-12).toDestination(); // -12dB quieter
+        
         const reverb = new Tone.Reverb({
           decay: 7, // Adjust decay time as desired
           preDelay: 0.01, // Adjust preDelay as desired
           wet: 0.8, // Adjust wet/dry mix as desired
-        }).toDestination(); // Connect the reverb to the master output
-             // Create the appropriate synth based on instrument type
-             AMSynth = new Tone.AMSynth().toDestination().connect(reverb);
-             DuoSynth = new Tone.DuoSynth().toDestination().connect(reverb);
-             FMSynth = new Tone.FMSynth().toDestination().connect(reverb);
-             MembraneSynth = new Tone.MembraneSynth().toDestination().connect(reverb);
-             MonoSynth = new Tone.MonoSynth().toDestination().connect(reverb);
-             NoiseSynth = new Tone.NoiseSynth().toDestination().connect(reverb);
-             PluckSynth = new Tone.PluckSynth().toDestination().connect(reverb);
-             PolySynth = new Tone.PolySynth().toDestination().connect(reverb);
-             synth = new Tone.Synth().toDestination().connect(reverb);
+        }).connect(volume); // Connect reverb to volume then to destination
         
-      synth.connect(reverb);
+             // Create the appropriate synth based on instrument type
+             AMSynth = new Tone.AMSynth().connect(reverb);
+             DuoSynth = new Tone.DuoSynth().connect(reverb);
+             FMSynth = new Tone.FMSynth().connect(reverb);
+             MembraneSynth = new Tone.MembraneSynth().connect(reverb);
+             MonoSynth = new Tone.MonoSynth().connect(reverb);
+             NoiseSynth = new Tone.NoiseSynth().connect(reverb);
+             PluckSynth = new Tone.PluckSynth().connect(reverb);
+             PolySynth = new Tone.PolySynth().connect(reverb);
+             synth = new Tone.Synth().connect(reverb);
+        
       toneInitiated = true;
     }
     const currentWord = wordData[currentIndex];
@@ -473,7 +476,6 @@ function start() {
       //words[index].style.fontWeight = 'bold';
       words[replayIndex].style.transition = 'none';
       words[replayIndex].style.backgroundColor = userColor;
-      words[replayIndex].style.filter = 'invert(75%)'
       words[replayIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
       
       // Enable transition and fade to white over 1 second
