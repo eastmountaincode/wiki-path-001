@@ -539,6 +539,7 @@ function start() {
         data.selectedPaths.length,
         "paths"
       );
+      console.log("Full data:", data.selectedPaths);
 
       // Store them for later replay
       savedSelectedPaths = {};
@@ -551,6 +552,7 @@ function start() {
           );
         }
       });
+      console.log("Final savedSelectedPaths object:", savedSelectedPaths);
     });
 
     // Another user joined
@@ -753,7 +755,9 @@ function start() {
   styleButton(replayServerSelectedButton, "70px");
   replayServerSelectedButton.addEventListener("click", () => {
     // Get all saved selected paths from server
+    console.log("🔍 Current savedSelectedPaths:", savedSelectedPaths);
     const savedPaths = Object.values(savedSelectedPaths);
+    console.log("🔍 savedPaths array:", savedPaths);
     if (savedPaths.length > 0) {
       const randomPath =
         savedPaths[Math.floor(Math.random() * savedPaths.length)];
@@ -768,6 +772,7 @@ function start() {
       );
     } else {
       console.log("⚠️ No saved selected paths from server");
+      console.log("⚠️ savedSelectedPaths object is:", savedSelectedPaths);
       replayServerSelectedButton.innerText = "No saved paths!";
       setTimeout(() => {
         replayServerSelectedButton.innerText =
