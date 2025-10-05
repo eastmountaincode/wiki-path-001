@@ -551,37 +551,38 @@ function start() {
 
         console.log(noteMap[noteNumber], noteOctave, 'instrument:', instrument);
 
+          // Use "+0.01" to schedule note slightly in future to prevent timing conflicts
+          const now = Tone.now();
+          
           switch(instrument) {
            case 'AMSynth':
-             AMSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+             AMSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
              break;
            case 'DuoSynth':
-             DuoSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+             DuoSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
              break;
            case 'FMSynth':
-             FMSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+             FMSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
              break;
            case 'MembraneSynth':
-             MembraneSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+             MembraneSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
              break;
            case 'MonoSynth':
-             MonoSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+             MonoSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
              break;
            case 'NoiseSynth':
-             NoiseSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+             NoiseSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
              break;
            case 'PluckSynth':
-             PluckSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+             PluckSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
              break;
            case 'PolySynth':
-             PolySynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+             PolySynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
              break;
            case 'Synth':
            default:
-             synth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
+             synth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
              break;
          }
-
-        synth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength);
       }
     }
