@@ -539,22 +539,26 @@ function start() {
 
       // Tone stuff
 
-      function playNote(currentIndex, command, line, instrument = userInstrument) {
-        const noteWord = words[currentIndex].textContent;
-        const direction = command;
-        const depth = line;
+       function playNote(currentIndex, command, line, instrument = userInstrument) {
+         // Safety check: don't play if synths aren't initialized yet
+         if (!toneInitiated) return;
+         
+         const noteWord = words[currentIndex].textContent;
+         const direction = command;
+         const depth = line;
 
-        const noteLength = noteWord.length * 0.05;
-        const noteOctave = depth % 4 + 1;
-        const noteNumber = currentIndex % 5;
-        const noteMap = ['A', 'C', 'D', 'E', 'G'];
+         const noteLength = noteWord.length * 0.05;
+         const noteOctave = depth % 4 + 1;
+         const noteNumber = currentIndex % 5;
+         const noteMap = ['A', 'C', 'D', 'E', 'G'];
 
         console.log(noteMap[noteNumber], noteOctave, 'instrument:', instrument);
 
           // Use "+0.01" to schedule note slightly in future to prevent timing conflicts
           const now = Tone.now();
           
-          switch(instrument) {
+          try {
+            switch(instrument) {
            case 'AMSynth':
              AMSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
              break;
@@ -571,7 +575,8 @@ function start() {
              MonoSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
              break;
            case 'NoiseSynth':
-             NoiseSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
+             // NoiseSynth doesn't support pitched notes, just trigger with duration
+             NoiseSynth.triggerAttackRelease(noteLength, now + 0.01);
              break;
            case 'PluckSynth':
              PluckSynth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
@@ -584,5 +589,8 @@ function start() {
              synth.triggerAttackRelease(noteMap[noteNumber] + noteOctave, noteLength, now + 0.01);
              break;
          }
+          } catch (error) {
+            console.warn('Error playing note:', error.message);
+          }
       }
     }
