@@ -725,7 +725,7 @@ function start() {
   /** Add Button Controls - Stacked Column in Lower Right **/
 
   // Button configuration
-  const BUTTON_GAP = 60; // Gap between buttons in pixels
+  const BUTTON_GAP = 40; // Gap between buttons in pixels
   const BUTTON_BASE = 10; // Distance from bottom for first button
 
   // Common button styling function (index: 0 = bottom, 1 = second from bottom, etc.)
