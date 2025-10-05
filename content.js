@@ -28,8 +28,8 @@ function start() {
   // WebSocket connection
   const SOCKET_SERVER = 'https://wiki-path.freewaterhouse.com';
   let socket = null;
-  let userColor = null;
-  let userInstrument = 'Synth'; // Default instrument
+  let userColor = '#308557'; // Default color
+  let userInstrument = colorInstrumentMap[userColor]; // Default instrument
   let otherUsers = {}; // Track other users in the room
   
   // Synth instances (created once and reused)
